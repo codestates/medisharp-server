@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f56e6162b5a3
+Revision ID: ffd876156d06
 Revises: 
-Create Date: 2020-11-21 14:55:50.455438
+Create Date: 2020-11-21 22:59:36.784952
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f56e6162b5a3'
+revision = 'ffd876156d06'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,8 +23,8 @@ def upgrade():
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('image_dir', sa.String(length=100), nullable=False),
-    sa.Column('effect', sa.String(length=100), nullable=False),
-    sa.Column('capacity', sa.String(length=100), nullable=False),
+    sa.Column('effect', sa.Text(), nullable=False),
+    sa.Column('capacity', sa.Text(), nullable=False),
     sa.Column('validity', sa.String(length=100), nullable=False),
     sa.Column('camera', sa.Boolean(), nullable=False),
     sa.Column('users_id', sa.Integer(), nullable=False),
@@ -43,12 +43,12 @@ def upgrade():
     op.create_table('schedules_common',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=100), nullable=False),
-    sa.Column('users_id', sa.Integer(), nullable=False),
     sa.Column('memo', sa.String(length=100), nullable=False),
     sa.Column('startdate', sa.String(length=100), nullable=False),
     sa.Column('enddate', sa.String(length=100), nullable=False),
     sa.Column('cycle', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['users_id'], ['users.id'], ),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users_medicines',
@@ -62,12 +62,12 @@ def upgrade():
     sa.Column('year', sa.Integer(), nullable=False),
     sa.Column('month', sa.Integer(), nullable=False),
     sa.Column('date', sa.Integer(), nullable=False),
-    sa.Column('time', sa.DateTime(), nullable=False),
+    sa.Column('time', sa.Time(), nullable=False),
     sa.Column('check', sa.Boolean(), nullable=False),
-    sa.Column('users_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('schedules_common_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['schedules_common_id'], ['schedules_common.id'], ),
-    sa.ForeignKeyConstraint(['users_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('schedules_medicines',

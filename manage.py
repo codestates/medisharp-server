@@ -36,19 +36,28 @@ def run():
 
 @manager.command
 def test():
-    # """Runs the unit tests."""
-    # tests = unittest.TestLoader().discover('app/test', pattern='test*.py')
-    # result = unittest.TextTestRunner(verbosity=2).run(tests)
-    # if result.wasSuccessful():
-    #     return 0
-    # return 1
-    users1 = users.Users(full_name='test', email='test@gmail.com', password='testtest', mobile='010-1234-5678', login='basic')
-    # medicines1 = medicines(name='게보린', titl= '치통', image_dir='image.jpg', effect='치통끝', capacity='2알', validity='2년', camera=false, users_id=1)
 
-    # users_medicines1 = users_medicines(users_id=1, medicines_id=1)
-
-    db.session.add(users1)
+    my_schedules_date = schedules_date.Schedules_date(year=2020, month=11, date=22, time='12:39:00', check=True)
+    my_schedules_common = schedules_common.Schedules_common(title='처방받은 수면제', memo='자기전에 꼭 먹어!', startdate='6', enddate='15', cycle=2)
+    my_users = users.Users(full_name='Grace', email='grace@gmail.com6', password='testtest', mobile='010-1234-56784', login='basic4')
+    my_medicines = medicines.Medicines(name='잘자정6', title= '수면유도제', image_dir='sleepfile.jpg', effect='불면 끝', capacity='1알', validity='일주일', camera=True)
+    
+    my_users.schedules_commons.append(my_schedules_common)
+    my_users.schedules_dates.append(my_schedules_date)
+    my_schedules_common.schedules_dates.append(my_schedules_date)
+    db.session.add(my_users)
+    db.session.add(my_medicines)
+    db.session.add(my_schedules_common)
+    db.session.add(my_schedules_date)
+    my_medicines.taker.append(my_users)
+    my_schedules_common.ttt.append(my_medicines)
+   
     db.session.commit()
+
+
+
+
+
 
 
 if __name__ == '__main__':

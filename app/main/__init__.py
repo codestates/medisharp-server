@@ -1,3 +1,5 @@
+#요기는 2번으로 한번 스쳐지나가주고 본격적으로 라우팅을 위해 app/__init__.py 로 갑니다
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt

@@ -1,3 +1,5 @@
+#서버 실행시 여기가 1번 실행 입니다. 그릐고 main/__init__.py로 가요
+
 import os
 import unittest
 
@@ -9,7 +11,7 @@ from app.main import create_app, db
 from app.main.model import users, medicines, schedules_common, schedules_date
 
 app = create_app(os.getenv('BOILERPLATE_ENV') or 'dev')
-app.register_blueprint(blueprint)
+app.register_blueprint(blueprint) #이 코드 꼭 추가해주세요. 라우팅에 필요합니다. 없으니 안되더라구요
 
 app.app_context().push()
 
@@ -19,17 +21,6 @@ migrate = Migrate(app, db)
 
 manager.add_command('db', MigrateCommand)
 
-
-# def create_app():
-#   app = Flask(__name__)
-
-#   db = SQLAlchemy()
-#   db.init_app(app)
-
-#   seeder = FlaskSeeder()
-#   seeder.init_app(app, db)
-
-#   return app
 
 @manager.command
 def run():

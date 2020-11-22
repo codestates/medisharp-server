@@ -15,7 +15,7 @@ _user = UserDto.user
 class KakaoSignIn(Resource):
     def get(self):
         client_id = "337ef29844da6a8441a6d6758461107b"
-        redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
+        redirect_uri = "https://gentle-anchorage-17372.herokuapp.com/oauth/kakao/callback"
         kakao_oauthurl = f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
         return redirect(kakao_oauthurl)
 
@@ -29,7 +29,7 @@ class KakaoSignInCallback(Resource):
         try:
             code = request.args.get("code")                                       
             client_id = "337ef29844da6a8441a6d6758461107b"
-            redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
+            redirect_uri = "https://gentle-anchorage-17372.herokuapp.com/oauth/kakao/callback"
             
             print("code :" , code)
 
@@ -55,16 +55,18 @@ class KakaoSignInCallback(Resource):
             profile_request = requests.get(
                     "https://kapi.kakao.com/v2/user/me", headers={"Authorization" : f"Bearer {access_token}"},
                 )
-            profile_json = profile_request.json()
-            print("profile_json:", profile_json)
+            data = profile_request.json()
+            
+            # profile_json = profile_request.json()
+            # print("profile_json:", profile_json)
 
-            kakao_account = profile_json.get("properties")
-            email = kakao_account.get("nickname", None)
-            kakao_id = profile_json.get("id")
+            # kakao_account = profile_json.get("properties")
+            # email = kakao_account.get("nickname", None)
+            # kakao_id = profile_json.get("id")
 
-            print("kakao_account:", kakao_account)
-            print("email:", email)
-            print("kakao_id:", kakao_id)
+            # print("kakao_account:", kakao_account)
+            # print("email:", email)
+            # print("kakao_id:", kakao_id)
 
         except KeyError:
             return make_response({"message" : "INVALID_TOKEN"}, 400)
@@ -72,4 +74,4 @@ class KakaoSignInCallback(Resource):
         except access_token.DoesNotExist:
             return make_response({"message" : "INVALID_TOKEN"}, 400)
           
-        return social_signin()
+        return social_signin(data=data)

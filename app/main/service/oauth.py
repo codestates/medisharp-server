@@ -1,25 +1,54 @@
 from flask import request, redirect
+import jwt
 
 from app.main import db
 from app.main.model.users import Users
 
+from ..config import jwt_key, jwt_alg
 
-def social_signin():
-    return Users.query.all()
-  # if Account.objects.filter(kakao_id = kakao_id).exists():
-        #     user = Account.objects.get(kakao_id = kakao_id)
-        #     token = jwt.encode({"email" : email}, SECRET_KEY, algorithm = "HS256")
-        #     token = token.decode("utf-8")
 
-        #     return JsonResponse({"token" : token}, status=200)
 
-        # else :
-        #     Account(
-        #         kakao_id = kakao_id,
-        #         email    = email,
-        #     ).save()
+def social_signin(data):
+    #print("profile_json:", data)
 
-        #     token = jwt.encode({"email" : email}, SECRET_KEY, algorithm = "HS256")
-        #     token = token.decode("utf-8")
+    kakao_account = data.get("properties")
+    email = kakao_account.get("nickname", None)
+    kakao_id = str(data.get("id"))
 
-        #     return JsonResponse({"token" : token}, status = 200)
+    #print("kakao_account:", kakao_account)
+    #print("email:", email)
+    #print("kakao_id:", kakao_id)
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+      new_user = Users(
+            email=email,
+            password=kakao_id,
+            full_name=email,
+            mobile='null',
+            login='social'
+      )
+      save_social(new_user)
+      token = jwt.encode({"email":email}, jwt_key, jwt_alg)
+      token = token.decode("utf-8")
+      print("token:", token)
+      response_object = {
+          'status': 'success',
+          'message': '회원가입 되었습니다.'
+      }
+      return response_object, token, 200
+    else:
+      print("user:", user.email)
+      email = user.email
+      token = jwt.encode({"email":email}, jwt_key, jwt_alg)
+      token = token.decode("utf-8")
+      print("token:", token)
+      response_object = {
+          'status': 'already signin',
+          'message': '이미 가입된 회원입니다.',
+      }
+      return response_object, 201
+
+
+def save_social(data):
+    db.session.add(data)
+    db.session.commit()

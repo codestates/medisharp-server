@@ -2,7 +2,7 @@ from .. import db
 from datetime import datetime
 
 class Schedules_date(db.Model):
-
+    """ Schedules_date Model for each alarms related (prescribed) medication """
     __tablename__ = "schedules_date"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -14,13 +14,6 @@ class Schedules_date(db.Model):
   
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     schedules_common_id = db.Column(db.Integer, db.ForeignKey('schedules_common.id'), nullable=False)
-
-    def __init__(self, year, month, date, time, check):
-        self.year = year
-        self.month = month
-        self.date = date
-        self.time = time
-        self.check = check
 
     def __repr__(self):
         return "<schedules_date '{}'>".format(self.year)

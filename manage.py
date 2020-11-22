@@ -39,8 +39,8 @@ def test():
 
     my_schedules_date = schedules_date.Schedules_date(year=2020, month=11, date=22, time='12:39:00', check=True)
     my_schedules_common = schedules_common.Schedules_common(title='처방받은 수면제', memo='자기전에 꼭 먹어!', startdate='6', enddate='15', cycle=2)
-    my_users = users.Users(full_name='Grace', email='grace@gmail.com6', password='testtest', mobile='010-1234-56784', login='basic4')
-    my_medicines = medicines.Medicines(name='잘자정6', title= '수면유도제', image_dir='sleepfile.jpg', effect='불면 끝', capacity='1알', validity='일주일', camera=True)
+    my_users = users.Users(full_name='Grace', email='hjngy0511@gmail.com', password='qwerty12345', mobile='010-1234-5678', login='basic')
+    my_medicines = medicines.Medicines(name='잘자정', title= '수면유도제', image_dir='sleepfile.jpg', effect='불면 끝', capacity='1알', validity='일주일', camera=False)
     
     my_users.schedules_commons.append(my_schedules_common)
     my_users.schedules_dates.append(my_schedules_date)

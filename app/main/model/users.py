@@ -21,14 +21,14 @@ class Users(db.Model):
     schedules_dates = db.relationship('Schedules_date', backref='schedules_udate', lazy=True)
     schedules_commons = db.relationship('Schedules_common', backref='schedules_ucommon', lazy=True)
 
-    def __init__(self, full_name, email, password, mobile, login):
-      self.full_name = full_name
-      self.email = email
-      self.mobile = flask_bcrypt.generate_password_hash(mobile)
-      self.login = login
-      self.password = flask_bcrypt.generate_password_hash(password)
     
-    def __repr__(self):
-        return "<Users('{self.id}','{self.full_name}','{self.email}','{self.password}','{self.mobile}','{self.login}')>"
+    def __init__(self, full_name, email, password, mobile, login):
+        self.full_name = full_name
+        self.email = email
+        self.password = flask_bcrypt.generate_password_hash(password)
+        self.mobile = flask_bcrypt.generate_password_hash(mobile)
+        self.login = login
+        
 
-      
+    def __repr__(self):
+        return "<users '{}'>".format(self.full_name)

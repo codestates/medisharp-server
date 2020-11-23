@@ -4,43 +4,59 @@ from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_
 import json
-
+import jwt
 from datetime import time
 from operator import itemgetter
-
 from app.main import db
 from app.main.model.schedules_date import Schedules_date
 from app.main.model.users import Users
+from ..config import jwt_key, jwt_alg
 
 class TimeFormat(fields.Raw):
     def format(self, value):
         return time.strftime(value, "%H:%M")
 
-
-def get_monthly_checked(data): #req는 data{today:'yyyy-mm'}일 것 같음
+def sorting_date_time(data):
+  """ date로 오름차순 정렬 후 time으로 오름차순 정렬하는 함수 """
+  data = sorted(data, key=itemgetter('date', 'time'))
+  return data
+# 
+def get_monthly_checked(data): 
   """ Get monthly checked API for calendar"""
   try:
-    parsing = data['today'].split('-') #그러면 parsing = ['yyyy', 'mm', 'dd hh:mm:ss'] 일 것 같음
-    year = parsing[0] #'yyyy'
-    month = parsing[1] #'mm'
-    
-    user_id = 1 #이건 session을 확인해야하지만 일단 1로 하드코딩해 놓았음
+    parsing = data['today'].split('-') 
+    year = parsing[0] 
+    month = parsing[1] 
+  
+    token = jwt.encode({"id":1}, jwt_key, jwt_alg)
+    token = token.decode("utf-8") 
+    print("token ", token) #token  eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MX0.UgGrWBSBD2t1PHbjRRr3kSqWr3ECc65oXndQaaCrKqc
 
-    topic_fields = {
-      'date': fields.Integer(required=True),
-      'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),
-      'check': fields.Boolean(required=True),
-    }
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
+    print("decoded_token ", decoded_token) #decoded_token  {'id': 1}
+    print("user_id ", user_id) #user_id  1
 
-    data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year==year, Schedules_date.month==month, Schedules_date.user_id==user_id)).all()]
-    results = sorting_date_time(data)
-
-    response_object = {
-      'status': 'OK',
-      'message': 'Successfully get monthly checked.',
-      'results': results
-    }
-    return response_object, 200
+    if decoded_token:
+      topic_fields = {
+        'date': fields.Integer(required=True),
+        'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),
+        'check': fields.Boolean(required=True),
+      }
+      data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year==year, Schedules_date.month==month, Schedules_date.user_id==user_id)).all()]
+      results = sorting_date_time(data)
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully get monthly checked.',
+        'results': results
+      }
+      return response_object, 200
+    else:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
 
   except Exception as e:
     response_object = {
@@ -49,8 +65,3 @@ def get_monthly_checked(data): #req는 data{today:'yyyy-mm'}일 것 같음
     }
     return response_object, 500
 
-  
-def sorting_date_time(data):
-  """ date로 오름차순 정렬 후 time으로 오름차순 정렬하는 함수 """
-  data = sorted(data, key=itemgetter('date', 'time'))
-  return data

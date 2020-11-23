@@ -22,14 +22,6 @@ migrate = Migrate(app, db)
 
 manager.add_command('db', MigrateCommand)
 
-
-# def create_app():
-#     app = Flask(__name__)
-
-#     db = SQLAlchemy()
-#     db.init_app(app)
-#     return app
-
 @manager.command
 def run():
     app.run()

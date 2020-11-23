@@ -13,6 +13,5 @@ class Check(Resource):
  
   def get(self):
     """Get Montly Checked API"""
-
     data = request.args.to_dict()
     return get_monthly_checked(data)

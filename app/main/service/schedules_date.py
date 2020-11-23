@@ -27,15 +27,10 @@ def get_monthly_checked(data):
     parsing = data['today'].split('-') 
     year = parsing[0] 
     month = parsing[1] 
-  
-    token = jwt.encode({"id":1}, jwt_key, jwt_alg)
-    token = token.decode("utf-8") 
-    print("token ", token) #token  eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MX0.UgGrWBSBD2t1PHbjRRr3kSqWr3ECc65oXndQaaCrKqc
 
+    token = request.headers.get('Authorization')
     decoded_token = jwt.decode(token, jwt_key, jwt_alg)
     user_id = decoded_token['id']
-    print("decoded_token ", decoded_token) #decoded_token  {'id': 1}
-    print("user_id ", user_id) #user_id  1
 
     if decoded_token:
       topic_fields = {

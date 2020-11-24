@@ -30,7 +30,7 @@ class KakaoSignInCallback(Resource):
             code = request.args.get("code")  # callback 뒤에 붙어오는 request token을 뽑아내 줍니다.                                    
             client_id = "337ef29844da6a8441a6d6758461107b"
             redirect_uri = "https://gentle-anchorage-17372.herokuapp.com/oauth/kakao/callback"
-
+            
             #print("code :" , code)
 
             #Python에서 HTTP 요청을 보내는 모듈인 requests
@@ -39,11 +39,11 @@ class KakaoSignInCallback(Resource):
             token_request = requests.get(                                       
                 f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={client_id}&redirect_uri={redirect_uri}&code={code}"
             )
-
+            
             token_json = token_request.json()  # 위의 get 요청을 통해 받아온 데이터를 json화 해주면 이곳에 access token 이 숨어있습니다.
 
             #print("token_json:", token_json)                                
-
+            
 
             error = token_json.get("error",None)
 
@@ -59,7 +59,7 @@ class KakaoSignInCallback(Resource):
             data = profile_request.json()
             # 위의 코드로 이번엔 카카오에서 유저 정보를 담은 url에 access token을 담아서, 유저 정보를 겟 요청합니다.
 
-
+            
             # profile_json = profile_request.json()
             # print("profile_json:", profile_json)
 
@@ -76,5 +76,5 @@ class KakaoSignInCallback(Resource):
 
         except access_token.DoesNotExist:
             return make_response({"message" : "INVALID_TOKEN"}, 400)
-
+          
         return social_signin(data=data) # 이젠 위에서 받은 데이터를 DB에 넣어줘야 합니다. 이 과정이 service에서 진행됩니다.

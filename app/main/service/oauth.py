@@ -47,11 +47,10 @@ def social_signin(data):
       response_object = {
           'status': 'already signin',
           'message': '이미 가입된 회원입니다.',
-          'Authorization': token
       }
-  
+      return response_object, token, 201
 
 
 def save_social(data):
     db.session.add(data)
-    db.session.commit() 
+    db.session.commit()

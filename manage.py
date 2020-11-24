@@ -1,9 +1,11 @@
+#서버 실행시 여기가 1번 실행 입니다. 그릐고 main/__init__.py로 가요
 import os
 import unittest
 
+# from flask import Flask
+# from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
-# from flask_seeder import FlaskSeeder
 
 from app import blueprint
 from app.main import create_app, db
@@ -18,18 +20,6 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 manager.add_command('db', MigrateCommand)
-
-
-# def create_app():
-#   app = Flask(__name__)
-
-#   db = SQLAlchemy()
-#   db.init_app(app)
-
-#   seeder = FlaskSeeder()
-#   seeder.init_app(app, db)
-
-#   return app
 
 @manager.command
 def run():

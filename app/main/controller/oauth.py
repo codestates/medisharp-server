@@ -11,13 +11,12 @@ import requests
 from ..service.oauth import social_signin
 
 api = UserDto.api
-_user = UserDto.user
 
 @api.route("/") # 카카오 로그인하기를 누르면 우선 해당 api로 오게되고, redirect를 통해 바로 request token을 받기 위해 링크가 변경됩니다.
 class KakaoSignIn(Resource):
     def get(self):
         client_id = "337ef29844da6a8441a6d6758461107b"
-        redirect_uri = "https://gentle-anchorage-17372.herokuapp.com/oauth/kakao/callback"
+        redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
         kakao_oauthurl = f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
         return redirect(kakao_oauthurl)
 
@@ -29,7 +28,7 @@ class KakaoSignInCallback(Resource):
         try:
             code = request.args.get("code")  # callback 뒤에 붙어오는 request token을 뽑아내 줍니다.                                    
             client_id = "337ef29844da6a8441a6d6758461107b"
-            redirect_uri = "https://gentle-anchorage-17372.herokuapp.com/oauth/kakao/callback"
+            redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
             
             #print("code :" , code)
 
@@ -58,18 +57,6 @@ class KakaoSignInCallback(Resource):
                 )
             data = profile_request.json()
             # 위의 코드로 이번엔 카카오에서 유저 정보를 담은 url에 access token을 담아서, 유저 정보를 겟 요청합니다.
-
-            
-            # profile_json = profile_request.json()
-            # print("profile_json:", profile_json)
-
-            # kakao_account = profile_json.get("properties")
-            # email = kakao_account.get("nickname", None)
-            # kakao_id = profile_json.get("id")
-
-            # print("kakao_account:", kakao_account)
-            # print("email:", email)
-            # print("kakao_id:", kakao_id)
 
         except KeyError:
             return make_response({"message" : "INVALID_TOKEN"}, 400)

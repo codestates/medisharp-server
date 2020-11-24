@@ -30,25 +30,28 @@ def social_signin(data):
             login='social'
       )
       save_social(new_user) # 아래에 정의된 함수입니다. DB에 위에 정의한 데이터를 저장!
-      token = jwt.encode({"email":email}, jwt_key, jwt_alg) #그리고 저장했으니 토큰을 만들어줘야겠죠
+      print("user:", new_user.id)
+      token = jwt.encode({"id":new_user.id}, jwt_key, jwt_alg) #그리고 저장했으니 토큰을 만들어줘야겠죠
       token = token.decode("utf-8")
       print("token:", token)
       response_object = {
           'status': 'success',
-          'message': '회원가입 되었습니다.'
+          'message': 'you become a member for our service',
+          'Authorization': token
       }
-      return response_object, token, 200 # 위에서 만든 토큰을 클라에서 보냅니다
+      return response_object, 200 # 위에서 만든 토큰을 클라에서 보냅니다
     else: # 이건 로그인 시도했는데 데이터가 있는 경우
-      #print("user:", user.email)
-      email = user.email # 데이터에서 이메일 값만 뽑아와서
-      token = jwt.encode({"email":email}, jwt_key, jwt_alg) #토큰을 만들어줍니다
+      user_id = user.id 
+      print("user:", user_id)
+      token = jwt.encode({"id":user_id}, jwt_key, jwt_alg) #토큰을 만들어줍니다
       token = token.decode("utf-8")
       #print("token:", token)
       response_object = {
           'status': 'already signin',
-          'message': '이미 가입된 회원입니다.',
+          'message': 'you already our member. login success',
+          'Authorization': token
       }
-      return response_object, token, 201
+      return response_object, 201
 
 
 def save_social(data):

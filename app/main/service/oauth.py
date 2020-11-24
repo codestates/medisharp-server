@@ -36,7 +36,7 @@ def social_signin(data):
       print("token:", token)
       response_object = {
           'status': 'success',
-          'message': '회원가입 되었습니다.',
+          'message': 'you become a member for our service',
           'Authorization': token
       }
       return response_object, 200 # 위에서 만든 토큰을 클라에서 보냅니다
@@ -48,7 +48,7 @@ def social_signin(data):
       #print("token:", token)
       response_object = {
           'status': 'already signin',
-          'message': '이미 가입된 회원입니다.',
+          'message': 'you already our member. login success',
           'Authorization': token
       }
       return response_object, 201

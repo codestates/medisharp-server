@@ -1,3 +1,4 @@
+#서버 실행시 여기가 1번 실행 입니다. 그릐고 main/__init__.py로 가요
 import os
 import unittest
 
@@ -5,7 +6,6 @@ import unittest
 # from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
-# from flask_seeder import FlaskSeeder
 
 from app import blueprint
 from app.main import create_app, db

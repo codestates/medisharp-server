@@ -1,6 +1,5 @@
 from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
-
 from ..util.dto import MedicineDto
 import requests
 from ..service.medicines import post_medicine
@@ -30,14 +29,11 @@ api = MedicineDto.api
     }
   ]
 }
-
 라고 생각하고 구현
 """
-
 @api.route('')
 class PostMedicine(Resource):
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
-   

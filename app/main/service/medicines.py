@@ -18,7 +18,6 @@ def post_medicine(data):
     token = request.headers.get('Authorization')
     decoded_token = jwt.decode(token, jwt_key, jwt_alg)
     user_id = decoded_token['id']
-
     if decoded_token:
       for el in data:
         new_medicine = Medicines(
@@ -44,18 +43,10 @@ def post_medicine(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-
+      
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
-
-
-
-
-
-
-
-

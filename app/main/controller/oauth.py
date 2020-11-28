@@ -9,13 +9,14 @@ from flask_restx import Resource
 from ..util.dto import UserDto
 import requests
 from ..service.oauth import social_signin
+from ..config import kakao_client_id
 
 api = UserDto.api
 
 @api.route("/") # 카카오 로그인하기를 누르면 우선 해당 api로 오게되고, redirect를 통해 바로 request token을 받기 위해 링크가 변경됩니다.
 class KakaoSignIn(Resource):
     def get(self):
-        client_id = "337ef29844da6a8441a6d6758461107b"
+        client_id = kakao_client_id
         redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
         kakao_oauthurl = f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
         return redirect(kakao_oauthurl)
@@ -27,7 +28,7 @@ class KakaoSignInCallback(Resource):
         #print("request.GET :" , request.args.get)
         try:
             code = request.args.get("code")  # callback 뒤에 붙어오는 request token을 뽑아내 줍니다.                                    
-            client_id = "337ef29844da6a8441a6d6758461107b"
+            client_id = kakao_client_id
             redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
             
             #print("code :" , code)

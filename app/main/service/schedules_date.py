@@ -80,7 +80,6 @@ def get_today_checked(data):
         'check': fields.Boolean(required=True),
       }
       data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(start_day_parsing[2], end_day_parsing[2]), Schedules_date.user_id==user_id)).all()]
-      print(data)
       response_object = {
         'status': 'OK',
         'message': 'Successfully get today checked.',

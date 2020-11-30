@@ -114,6 +114,21 @@ def get_alarms_list(data):
         'status': 'OK',
         'message': 'Successfully get monthly checked.',
         'results': results
+      }
+      return response_object, 200
+    else:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
 
 
 def get_today_checked(data): 

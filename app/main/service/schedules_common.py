@@ -28,12 +28,17 @@ def post_schedules_common(data):
         cycle=data['cycle'],
         user_id=user_id,
         )
-      print('new_schedules_common: ', new_schedules_common)
       db.session.add(new_schedules_common)
-      db.session.commit()
+      db.session.commit() 
+      
+      results = {
+        "new_schedules_common_id": new_schedules_common.id,
+        "time": data['time']
+      }
       response_object = {
         'status': 'OK',
         'message': 'Successfully get monthly checked.',
+        'results': results
       }
       return response_object, 200
     else:

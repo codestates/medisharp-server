@@ -14,6 +14,6 @@ api = Api(blueprint,
           )
 
 
-api.add_namespace(schedules_date, path='/schedules_dates')
+api.add_namespace(schedules_date, path='/schedules-dates')
 api.add_namespace(oauth, path="/oauth/kakao") 
 api.add_namespace(test)

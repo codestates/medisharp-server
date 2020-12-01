@@ -80,7 +80,7 @@ today: 2020-11-22 12:23:00
 def get_alarms_list(data): 
   """ Get Alarms List on Clicked date for main page and calendar page"""
   try:
-    parsing = re.split('-| ', data['date']) 
+    parsing = re.split('-| ', data['today']) 
     year = parsing[0] 
     month = parsing[1] 
     date = parsing[2]

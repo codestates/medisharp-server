@@ -98,7 +98,6 @@ def get_alarms_list(data):
       """
       # reference: https://www.youtube.com/watch?v=_HIY1lZKEw0
       data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.year==year, Schedules_date.month==month,Schedules_date.date==date, Schedules_date.user_id==user_id)).all() 
-
       results = []
       for el in data:
         result = {}
@@ -137,17 +136,36 @@ def get_today_checked(data):
     start_day_parsing = re.split('-| ', data['start_day']) 
     end_day_parsing = re.split('-| ', data['end_day']) 
 
-    # token = request.headers.get('Authorization')
-    # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    # user_id = decoded_token['id']
-    user_id = 1
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
 
-    #if decoded_token:
-    if user_id:
+    if decoded_token:
       topic_fields = {
         'check': fields.Boolean(required=True),
       }
-      data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(start_day_parsing[2], end_day_parsing[2]), Schedules_date.user_id==user_id)).all()]
+      if end_day_parsing[1] < start_day_parsing[1]:
+        if end_day_parsing[2] < start_day_parsing[2]:
+          data1 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==start_day_parsing[1], Schedules_date.date.between(start_day_parsing[2], 31), Schedules_date.user_id==user_id)).all()]
+          data2 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==start_day_parsing[1], Schedules_date.date.between(1, end_day_parsing[2]),Schedules_date.user_id==user_id)).all()]
+          data3 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==end_day_parsing[1],  Schedules_date.date.between(start_day_parsing[2], 31), Schedules_date.user_id==user_id)).all()]
+          data4 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==end_day_parsing[1], Schedules_date.date.between(1, end_day_parsing[2]),Schedules_date.user_id==user_id)).all()]
+          
+          data = data1+data2+data3+data4
+        else:
+          data1 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==start_day_parsing[1], Schedules_date.date.between(start_day_parsing[2],end_day_parsing[2]), Schedules_date.user_id==user_id)).all()]
+          data2 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month==end_day_parsing[1], Schedules_date.date.between(start_day_parsing[2],end_day_parsing[2]),Schedules_date.user_id==user_id)).all()]
+          
+          data = data1+data2
+      else:
+        if end_day_parsing[2] < start_day_parsing[2]:
+          data1 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(start_day_parsing[2], 31), Schedules_date.user_id==user_id)).all()]
+          data2 = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(1, end_day_parsing[2]),Schedules_date.user_id==user_id)).all()]
+          data = data1+data2
+        else:
+          data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(start_day_parsing[2],end_day_parsing[2]),Schedules_date.user_id==user_id)).all()]
+
+      print(data)
       response_object = {
         'status': 'OK',
         'message': 'Successfully get today checked.',

@@ -114,6 +114,21 @@ def get_alarms_list(data):
         'status': 'OK',
         'message': 'Successfully get monthly checked.',
         'results': results
+      }
+      return response_object, 200
+    else:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
 
 
 def get_today_checked(data): 
@@ -122,13 +137,11 @@ def get_today_checked(data):
     start_day_parsing = re.split('-| ', data['start_day']) 
     end_day_parsing = re.split('-| ', data['end_day']) 
 
-    # token = request.headers.get('Authorization')
-    # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    # user_id = decoded_token['id']
-    user_id = 1
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
 
-    #if decoded_token:
-    if user_id:
+    if decoded_token:
       topic_fields = {
         'check': fields.Boolean(required=True),
       }

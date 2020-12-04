@@ -6,9 +6,7 @@ class Schedules_date(db.Model):
     __tablename__ = "schedules_date"
 
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
-    month = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.Integer, nullable=False)
+    alarmdate = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     check = db.Column(db.Boolean, nullable=False)
   

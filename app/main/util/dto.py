@@ -20,3 +20,15 @@ class UserDto:
         'mobile': fields.String(description='user mobile num'),
         'login': fields.String(required=True, description='user kind login')
     })
+
+class MedicinesDto:
+  api = Namespace('medicines', description='Information on medications users are taking')
+  medicines = api.model('medicines', {
+    'name': fields.String(required=True, description='medicine name'),
+    'title': fields.String(description='personal description for this medicines'),
+    'image_dir': fields.String(description='medicine image file path'),
+    'effect': fields.String(description='medicine efficacy'),
+    'capacity': fields.String(description='medicine dosage'),
+    'validity': fields.String(description='medicine validity'),
+    'camera': fields.Boolean(description='Whether to register as a camera')
+  })

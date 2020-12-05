@@ -1,15 +1,15 @@
 from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 
-from ..util.dto import Schedules_medicinesDto
+from ..util.dto import MedicinesDto
 import requests
-from ..service.schedules_medicines import post_schedules_medicines
+from ..service.medicines import post_schedules_common_medicines
 
-api = Schedules_medicinesDto.api
-_schedules_medicines = Schedules_medicinesDto.schedules_medicines
+api = MedicinesDto.api
+#_medicines = MedicinesDto.medicines
 
 
-@api.route('') 
+@api.route('/schedules-medicines') 
 class PostSchedulesCommonMedicines(Resource):
   def post(self):
     """Post Schedules Common Medicines API"""

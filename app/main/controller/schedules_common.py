@@ -20,5 +20,5 @@ class PostSchedulesCommon(Resource):
 class PostSchedulesDate(Resource):
   def post(self):
     """Post Schedules Date API"""
-    data = request.get_json().get('schedules_common') 
-    return post_schedules_common(data) 
+    results = request.get_json().get('schedules_common') 
+    return post_schedules_common(results) 

@@ -35,7 +35,7 @@ def sorting_time(data):
 def get_monthly_checked(data): 
   """ Get monthly checked API for calendar"""
   try:
-    parsing = data['today'].split('-') 
+    parsing = data['month'].split('-') 
     year = parsing[0] 
     month = parsing[1] 
 

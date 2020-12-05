@@ -6,10 +6,10 @@ class Schedules_common(db.Model):
 
         id = db.Column(db.Integer, primary_key=True)
         title = db.Column(db.String(100), nullable=False)
-        memo = db.Column(db.String(100), nullable=False)
-        startdate = db.Column(db.String(100), nullable=False)
-        enddate = db.Column(db.String(100), nullable=False)
-        cycle = db.Column(db.Integer, nullable=False)
+        memo = db.Column(db.String(100), nullable=True)
+        startdate = db.Column(db.String(100), nullable=True)
+        enddate = db.Column(db.String(100), nullable=True)
+        cycle = db.Column(db.Integer, nullable=True)
 
         user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
         

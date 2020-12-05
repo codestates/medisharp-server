@@ -14,6 +14,7 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
+
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
@@ -58,28 +59,30 @@ def post_schedules_common(data):
       return response_object, 500
 
 
-def post_schedules_date(data):
+# yyyy-mm-dd  = alarmdate 
+# common api 에서 응답을 받아서 new schedules common id 랑 time(str) 
+# id값 찾아서 /스타트엔드사이클을 가지고 오고 / 타임이랑 같이 주기 계산 / 계산결과를 alarmdate로 테이블에 넣기
+def post_schedules_date(results):
   """ Post Schedules Date API"""
-
-  try:
-    token = request.headers.get('Authorization')
-    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    user_id = decoded_token['id']
-
-    if decoded_token:
-      each_schedules_date = Schedules_common(
-        startdate=data['startdate'],
-        enddate=data['enddate'],
-        cycle=data['cycle'],
-        user_id=user_id,
-      )
-      def eachdate(startdate, enddate):     
-        for cycle in range(int ((enddate - startdate).days)):
-          yield startdate + timedelta(days=cycle)  
   
-      results = {    
-        "eachdate": eachdate(),  
-        "time": data['time'],
+  try:
+    new_schdules_common_id = results['new_shedules_common.id']
+    time = results['time']
+    
+    if new_schedules_common_id:
+      new_schedules_common_id = Schedules_common.query.filter(Schedules_common.id==id).all(),
+      startdate = Schedules_common.query.filter(Schdules_common.startdate==startdate).all(),
+      enddate = Schedules_common.query.filter(Schedules_common.enddate==enddate).all(),
+      cycle = Schedules_common.query.filter(Schedules_common.cycle==cycle).all()
+      
+      alarmdate = []
+      for cycle in range(startdate, enddate):
+        yield startdate + timedelta(days=cycle) 
+        yield alarmdate.append(days=cycle)
+  
+      results = {   
+        "alarmdate": alarmdate,      
+        "time": results['time'],
         "check": data['check']
       }
       response_object = {

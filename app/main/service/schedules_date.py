@@ -137,13 +137,11 @@ def get_today_checked(data):
     start_day_parsing = re.split('-| ', data['start_day']) 
     end_day_parsing = re.split('-| ', data['end_day']) 
 
-    # token = request.headers.get('Authorization')
-    # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    # user_id = decoded_token['id']
-    user_id = 1
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
 
-    #if decoded_token:
-    if user_id:
+    if decoded_token:
       topic_fields = {
         'check': fields.Boolean(required=True),
       }

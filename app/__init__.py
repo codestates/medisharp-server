@@ -14,7 +14,7 @@ api = Api(blueprint,
           description='a boilerplate for flask restplus (restx) web service'
           )
 
-api.add_namespace(schedules_common, path='/schedules-common')
-api.add_namespace(schedules_date, path='/schedules_dates')
+api.add_namespace(schedules_common, path='/schedules-commons')
+api.add_namespace(schedules_date, path='/schedules-dates')
 api.add_namespace(oauth, path="/oauth/kakao") 
 api.add_namespace(test)

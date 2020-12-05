@@ -12,11 +12,11 @@ class Medicines(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
-    title = db.Column(db.String(255), nullable=False)
-    image_dir = db.Column(db.String(100), nullable=False)
-    effect = db.Column(db.Text, nullable=False)
-    capacity = db.Column(db.Text, nullable=False)
-    validity = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(255), nullable=True)
+    image_dir = db.Column(db.String(100), nullable=True)
+    effect = db.Column(db.Text, nullable=True)
+    capacity = db.Column(db.Text, nullable=True)
+    validity = db.Column(db.String(100), nullable=True)
     camera = db.Column(db.Boolean, nullable=False)
 
     timetotake = db.relationship('Schedules_common', secondary=schedules_medicines, backref=db.backref('ttt', lazy='dynamic'))

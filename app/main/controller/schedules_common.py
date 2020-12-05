@@ -16,9 +16,9 @@ class PostSchedulesCommon(Resource):
     data = request.get_json().get('schedules_common') 
     return post_schedules_common(data) 
 
-@api.route('/schedules-date') 
+@api.route('/schedules-dates') 
 class PostSchedulesDate(Resource):
   def post(self):
     """Post Schedules Date API"""
     results = request.get_json().get('schedules_common') 
-    return post_schedules_common(results) 
+    return post_schedules_common(data) 

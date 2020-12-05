@@ -5,6 +5,7 @@ from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_
 import json
 import jwt
+<<<<<<< HEAD
 from datetime import time, datetime, timedelta
 from operator import itemgetter
 from app.main import db
@@ -14,6 +15,14 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
+=======
+from datetime import time
+from operator import itemgetter
+from app.main import db
+from app.main.model.schedules_common import Schedules_common
+from app.main.model.users import Users
+from ..config import jwt_key, jwt_alg
+>>>>>>> Dev
 
 def post_schedules_common(data):
   """ Post Common information of alarm"""
@@ -33,7 +42,11 @@ def post_schedules_common(data):
         )
       db.session.add(new_schedules_common)
       db.session.commit() 
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> Dev
       results = {
         "new_schedules_common_id": new_schedules_common.id,
         "time": data['time']
@@ -50,6 +63,7 @@ def post_schedules_common(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+<<<<<<< HEAD
 
   except Exception as e:
       response_object = {
@@ -98,9 +112,16 @@ def post_schedules_date(results):
       }
       return response_object, 401
   
+=======
+      
+>>>>>>> Dev
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
+<<<<<<< HEAD
       return response_object, 500
+=======
+      return response_object, 500
+>>>>>>> Dev

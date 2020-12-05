@@ -29,4 +29,4 @@ class Schedules_commonDto:
     'startdate': fields.Integer(required=True, description='Alarm start date'),
     'enddate': fields.Integer(required=True, description='Alarm end date'),
     'cycle': fields.Integer(required=True, description='Alarm cycle'),
-  }) 
+  })

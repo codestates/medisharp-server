@@ -4,9 +4,7 @@ from flask_restx import Namespace, fields
 class Schedules_dateDto:
   api = Namespace('schedules_date', description='Schedules_date Model for each alarms related (prescribed) medication')
   schedules_date = api.model('schedules_date', {
-    'year': fields.Integer(required=True, description='Year with alarm schedule'),
-    'month': fields.Integer(required=True, description='Month with alarm schedule'),
-    'date': fields.Integer(required=True, description='Date with alarm schedule'),
+    'alarmdate': fields.Date(required=True, description='Date with alarm schedule'),
     'time': fields.String(required=True, description='Time(HH:MM:SS) with alarm schedule'),
     'check': fields.Boolean(required=True, description='Whether to take medicine on the day'),
   })
@@ -20,3 +18,15 @@ class UserDto:
         'mobile': fields.String(description='user mobile num'),
         'login': fields.String(required=True, description='user kind login')
     })
+
+class MedicineDto:
+  api = Namespace('medicines', description='Information on medications users are taking')
+  medicines = api.model('medicines', {
+    'name': fields.String(required=True, description='medicine name'),
+    'title': fields.String(description='personal description for this medicines'),
+    'image_dir': fields.String(description='medicine image file path'),
+    'effect': fields.String(description='medicine efficacy'),
+    'capacity': fields.String(description='medicine dosage'),
+    'validity': fields.String(description='medicine validity'),
+    'camera': fields.Boolean(description='Whether to register as a camera')
+  }) 

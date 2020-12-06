@@ -13,16 +13,17 @@ from app.main.model.schedules_date import Schedules_date
 from app.main.model.schedules_common import Schedules_common
 from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
-import re
+
 
 
 class TimeFormat(fields.Raw):
     def format(self, value):
         return time.strftime(value, "%H:%M")
 
-def sorting_date_time(data):
-  """ date로 오름차순 정렬 후 time으로 오름차순 정렬하는 함수 """
-  data = sorted(data, key=itemgetter('date', 'time'))
+def sorting_alarmdate_time(data):
+  """ DD로 오름차순 정렬 후 time으로 오름차순 정렬하는 함수 """
+  alarmdate = re.split('-', Schedules_date.alarmdate) 
+  data = sorted(alarmdate, key=itemgetter(3, 'time'))
   return data
 
 
@@ -34,10 +35,16 @@ def sorting_time(data):
 
 def get_monthly_checked(data): 
   """ Get monthly checked API for calendar"""
+  """
+  {
+    start_day: YYYY-MM-01
+    end_day: YYYY-MM-31
+    user_id: user_id 인증값
+  }
+  """
   try:
-    parsing = data['month'].split('-') 
-    year = parsing[0] 
-    month = parsing[1] 
+    start_day = data['start_day']
+    end_day = data['end_day'] 
 
     token = request.headers.get('Authorization')
     decoded_token = jwt.decode(token, jwt_key, jwt_alg)
@@ -45,12 +52,14 @@ def get_monthly_checked(data):
 
     if decoded_token:
       topic_fields = {
-        'date': fields.Integer(required=True),
+        'alarmdate': fields.Date(required=True),
         'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),
         'check': fields.Boolean(required=True),
       }
-      data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year==year, Schedules_date.month==month, Schedules_date.user_id==user_id)).all()]
-      results = sorting_date_time(data)
+      data = [marshal(topic, topic_fields) for topic in Schedules_date.query
+                                                                      .filter(and_(Schedules_date.alarmdate.between(start_day['YYYY-MM-DD'], end_day['YYYY-MM-DD']), Schedules_date.user_id==user_id))
+                                                                      .all()]
+      results = sorting_alarmdate_time(data)
       response_object = {
         'status': 'OK',
         'message': 'Successfully get monthly checked.',

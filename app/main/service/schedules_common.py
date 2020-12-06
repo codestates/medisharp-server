@@ -65,36 +65,36 @@ def post_schedules_date(data):
     decoded_token = jwt.decode(token, jwt_key, jwt_alg)
     user_id = decoded_token['id']
     
-    # if decoded_token:
-    #   new_schedules_common_id = Schedules_common.query.filter(Schedules_common.id==id).all(),
-    #   startdate = Schedules_common.query.filter(Schdules_common.startdate==startdate).all(),
-    #   enddate = Schedules_common.query.filter(Schedules_common.enddate==enddate).all(),
-    #   cycle = Schedules_common.query.filter(Schedules_common.cycle==cycle).all()      
+    if decoded_token:
+      new_schedules_common_id = Schedules_common.query.filter(Schedules_common.id==id).all(),
+      startdate = Schedules_common.query.filter(Schdules_common.startdate==startdate).all(),
+      enddate = Schedules_common.query.filter(Schedules_common.enddate==enddate).all(),
+      cycle = Schedules_common.query.filter(Schedules_common.cycle==cycle).all()      
 
-    #   alarmdate = []
-    #   for cycle in range(startdate, enddate):
-    #     yield startdate + timedelta(days=cycle) 
-    #     yield alarmdate.append(days=cycle)
-    #   db.session.add(alarmdate)
-    #   db.session.commit() 
+      alarmdate = []
+      for cycle in range(startdate, enddate):
+        yield startdate + timedelta(days=cycle) 
+        yield alarmdate.append(days=cycle)
+      db.session.add(alarmdate)
+      db.session.commit() 
 
-    #   results = {   
-    #     "alarmdate": alarmdate,      
-    #     "time": results['time'],
-    #     "check": data['check']
-    #   }
-    #   response_object = {
-    #     'status': 'OK',
-    #     'message': 'Successfully get monthly checked.',
-    #     'results': results
-    #   }
-    #   return response_object, 200
-    # else:
-    #   response_object = {
-    #     'status': 'fail',
-    #     'message': 'Provide a valid auth token.',
-    #   }
-    #   return response_object, 401
+      results = {   
+        "alarmdate": alarmdate,      
+        "time": results['time'],
+        "check": data['check']
+      }
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully get monthly checked.',
+        'results': results
+      }
+      return response_object, 200
+    else:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
   
   except Exception as e:
       response_object = {

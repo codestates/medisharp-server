@@ -179,7 +179,7 @@ class ImageUpload(Resource):
 
       response_object = {
         'status': 'OK',
-        'message': 'Successfully get monthly checked.',
+        'message': 'Successfully predict image class.',
         'prediction': prediction_result
       }
       return response_object, 200

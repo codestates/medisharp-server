@@ -3,8 +3,7 @@ from flask_restx import Resource
 
 from ..util.dto import Schedules_dateDto
 import requests
-from ..service.schedules_date import get_monthly_checked, get_alarms_list
-from ..service.schedules_date import get_today_checked
+from ..service.schedules_date import get_monthly_checked, get_alarms_list, get_today_checked
 
 api = Schedules_dateDto.api
 _schedules_date = Schedules_dateDto.schedules_date

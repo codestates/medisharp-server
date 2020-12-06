@@ -1,11 +1,10 @@
 from flask import request, redirect, jsonify, make_response, render_template
 from flask_restx import Resource
 from werkzeug.utils import secure_filename
-import requests
-import numpy 
-import cv2
-import os
+import requests, numpy, cv2, os, io
 import matplotlib.pyplot as plt
+
+from ..service.medicines import upload_img_s3
 
 from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
@@ -28,17 +27,24 @@ class ImageUpload(Resource):
         print('No Selected File')
     elif file and file.filename:
       filename = secure_filename(file.filename)
-      print('filename is: ', filename)
+      #print('filename is: ', filename)
       #read image file string data
       filestr = request.files['image'].read()
       # print("filestr: ", filestr)
 
+      #S3로 이미지 보내기 위한 service 파일 함수로 이동
+      return upload_img_s3(file)
+
+
       #convert string data to numpy array
       npimg = numpy.fromstring(filestr, numpy.uint8)
-      print("npimg: ", npimg)
+      #print("npimg: ", npimg)
       # # convert numpy array to image
       img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-      print("img: ", img)
 
-      filepath = os.path.join('/Users/jeonghyeonjeong/Desktop/medisharp/medisharp-server/clientimg', filename);
-      file.save(img)
+      #image_L_url = f"{S3['aws_url']}{unique_id}_{image_file.name.split('product_')[1]}_L"
+
+      # print("img: ", img)
+
+      # filepath = os.path.join('/Users/jeonghyeonjeong/Desktop/medisharp/medisharp-server/clientimg', filename);
+      # file.save(img)

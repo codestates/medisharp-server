@@ -17,32 +17,33 @@ import re
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
-    token = request.headers.get('Authorization')
-    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    user_id = decoded_token['id']
-
-    if decoded_token:
-      new_schedules_common = Schedules_common(
-        title=data['title'], 
-        memo=data['memo'],
-        startdate=data['startdate'],
-        enddate=data['enddate'],
-        cycle=data['cycle'],
-        user_id=user_id,
-        )
-      db.session.add(new_schedules_common)
-      db.session.commit() 
-      results = {
-        "new_schedules_common_id": new_schedules_common.id,
-        "time": data['time']
-      }
-      response_object = {
-        'status': 'OK',
-        'message': 'Successfully get monthly checked.',
-        'results': results
-      }
-      return response_object, 200
-    else:
+    try: 
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        new_schedules_common = Schedules_common(
+          title=data['title'], 
+          memo=data['memo'],
+          startdate=data['startdate'],
+          enddate=data['enddate'],
+          cycle=data['cycle'],
+          user_id=user_id,
+          )
+        db.session.add(new_schedules_common)
+        db.session.commit() 
+        
+        results = {
+          "new_schedules_common_id": new_schedules_common.id,
+          "time": data['time']
+        }
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get monthly checked.',
+          'results': results
+        }
+        return response_object, 200
+    except Exception as e:  
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

@@ -32,3 +32,14 @@ class MedicineDto:
     'validity': fields.String(description='medicine validity'),
     'camera': fields.Boolean(description='Whether to register as a camera')
   })
+
+class Schedules_commonDto:
+  api = Namespace('schedules_common', description='Schedules_common Model for total periods of alarms related (prescribed) medication')
+  schedules_common = api.model('schedules_common', {
+    'title': fields.String(required=True, description='Name indicating the medicine you need to take'),
+    'memo': fields.String(required=True, description='Description of the alarm'),
+    'startdate': fields.Integer(required=True, description='Alarm start date'),
+    'enddate': fields.Integer(required=True, description='Alarm end date'),
+    'cycle': fields.Integer(required=True, description='Alarm cycle'),
+  })
+

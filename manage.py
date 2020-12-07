@@ -13,7 +13,6 @@ from app.main.model import users, medicines, schedules_common, schedules_date
 
 app = create_app(os.getenv('BOILERPLATE_ENV') or 'dev')
 app.register_blueprint(blueprint)
-
 app.app_context().push()
 
 manager = Manager(app)

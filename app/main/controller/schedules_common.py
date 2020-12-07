@@ -8,10 +8,16 @@ from ..service.schedules_common import post_schedules_common
 api = Schedules_commonDto.api
 _schedules_common = Schedules_commonDto.schedules_common
 
-
 @api.route('') 
 class PostSchedulesCommon(Resource):
   def post(self):
     """Post Schedules Common API"""
     data = request.get_json().get('schedules_common') 
-    return post_schedules_common(data)
+    return post_schedules_common(data) 
+
+@api.route('/schedules-dates') 
+class PostSchedulesDate(Resource):
+  def post(self):
+    """Post Schedules Date API"""
+    results = request.get_json().get('schedules_common') 
+    return post_schedules_common(data) 

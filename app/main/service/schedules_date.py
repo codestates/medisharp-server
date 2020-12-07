@@ -15,10 +15,10 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
-
 class TimeFormat(fields.Raw):
     def format(self, value):
         return datetime.time.strftime(value, "%H:%M")
+
 
 class DateFormat(fields.Raw):
     def format(self, value):
@@ -40,19 +40,18 @@ def get_monthly_checked(data):
   try: 
     start_day = datetime.datetime.strptime(data['start_day'], '%Y-%m-%d')
     end_day = datetime.datetime.strptime(data['end_day'], '%Y-%m-%d')
+
     try: 
       token = request.headers.get('Authorization')
-
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
-
+      
       if decoded_token:
         topic_fields = {
           'alarmdate': DateFormat(readonly=True, description='Date in DD', default='DD'),
           'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),
           'check': fields.Boolean(required=True),
         }
-      
         data = [marshal(topic, topic_fields) for topic in Schedules_date.query
                                                                         .filter(and_(Schedules_date.alarmdate>=start_day, Schedules_date.alarmdate<end_day, Schedules_date.user_id==user_id))
                                                                         .all()]
@@ -69,7 +68,6 @@ def get_monthly_checked(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-
   except Exception as e:
     response_object = {
       'status': 'Internal Server Error',

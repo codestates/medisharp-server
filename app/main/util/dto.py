@@ -21,6 +21,18 @@ class UserDto:
         'login': fields.String(required=True, description='user kind login')
     })
 
+class MedicineDto:
+  api = Namespace('medicines', description='Information on medications users are taking')
+  medicines = api.model('medicines', {
+    'name': fields.String(required=True, description='medicine name'),
+    'title': fields.String(description='personal description for this medicines'),
+    'image_dir': fields.String(description='medicine image file path'),
+    'effect': fields.String(description='medicine efficacy'),
+    'capacity': fields.String(description='medicine dosage'),
+    'validity': fields.String(description='medicine validity'),
+    'camera': fields.Boolean(description='Whether to register as a camera')
+  })
+
 class Schedules_commonDto:
   api = Namespace('schedules_common', description='Schedules_common Model for total periods of alarms related (prescribed) medication')
   schedules_common = api.model('schedules_common', {
@@ -30,3 +42,4 @@ class Schedules_commonDto:
     'enddate': fields.Integer(required=True, description='Alarm end date'),
     'cycle': fields.Integer(required=True, description='Alarm cycle'),
   })
+

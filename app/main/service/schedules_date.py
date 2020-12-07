@@ -112,13 +112,12 @@ def get_alarms_list(data):
         'results': results
       }
       return response_object, 200
-    else:
+    except Exception as e:
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-
   except Exception as e:
     response_object = {
       'status': 'Internal Server Error',

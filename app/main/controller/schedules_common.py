@@ -3,7 +3,7 @@ from flask_restx import Resource
 
 from ..util.dto import Schedules_commonDto
 import requests
-from ..service.schedules_common import post_schedules_common
+from ..service.schedules_common import post_schedules_common, post_schedules_date
 
 api = Schedules_commonDto.api
 _schedules_common = Schedules_commonDto.schedules_common
@@ -15,9 +15,23 @@ class PostSchedulesCommon(Resource):
     data = request.get_json().get('schedules_common') 
     return post_schedules_common(data) 
 
+"""
+client에서 
+{
+  "schedules_common":
+    {
+      "medicine_id": [1, 2, 3],
+      "schedules__common_id": 1, 
+      "time": 11:30:00
+    }
+}
+을 request에 준다고 가정하고 짠다. 
+"""
+
+
 @api.route('/schedules-dates') 
 class PostSchedulesDate(Resource):
   def post(self):
     """Post Schedules Date API"""
-    results = request.get_json().get('schedules_common') 
-    return post_schedules_common(data) 
+    data = request.get_json().get('schedules_common') 
+    return post_schedules_date(data) 

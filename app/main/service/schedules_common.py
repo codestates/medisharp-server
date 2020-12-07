@@ -5,7 +5,7 @@ from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_
 import json
 import jwt
-from datetime import time, datetime, timedelta
+import datetime
 from operator import itemgetter
 from app.main import db
 from app.main.model.schedules_common import Schedules_common
@@ -58,12 +58,10 @@ def post_schedules_common(data):
       return response_object, 500
 
 
-# yyyy-mm-dd  = alarmdate 
-# common api 에서 응답을 받아서 new schedules common id 랑 time(str) 
-# id값 찾아서 /스타트엔드사이클을 가지고 오고 / 타임이랑 같이 주기 계산 / 계산결과를 alarmdate로 테이블에 넣기
 def post_schedules_date(data):
   """ Post Schedules Date API"""
   try:
+    medicine_id = data['medicine_id']
     schedules_common_id = data['schedules_common_id']
     time = data['time']
 
@@ -74,15 +72,38 @@ def post_schedules_date(data):
 
       if decoded_token:
         data = db.session.query(Schedules_common.startdate, Schedules_common.enddate, Schedules_common.cycle).filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all() 
-
-        startdate = data[0].startdate
-        enddate = data[0].enddate
-        cycle = data[0].cycle
+        #일단 startdate, enddate 형변환 
+        startdate = datetime.datetime.strptime(data[0].startdate, '%Y-%m-%d')
+        enddate = datetime.datetime.strptime(data[0].enddate, '%Y-%m-%d')
+        cycle = data[0].cycle #2
         print(startdate, enddate, cycle)
-       
+        
+        #비교연산자로 기저조건을 걸어주고 주기 계산
+        currdate = startdate
+        while currdate <= enddate:
+          currdate = currdate + datetime.timedelta(days=cycle)
+          print("date: ", currdate)
+          #이를 schedules_date 테이블에 넣어주기
+          new_schedules_date = Schedules_date(
+            alarmdate = currdate,
+            time = time,
+            check = 0,
+            user_id = user_id,
+            schedules_common_id = schedules_common_id
+          )
+          db.session.add(new_schedules_date)
+          db.session.commit()
+
+        #response는 medicine_id와 schedules_common_id
+        results = {
+          'medicine_id': medicine_id,
+          'schedules_common_id': schedules_common_id
+        }
+
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully post schedules date.',
+          'results': results
         }
         return response_object, 200
 

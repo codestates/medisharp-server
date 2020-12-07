@@ -3,6 +3,7 @@ from flask import Blueprint
 
 from .main.controller.schedules_common import api as schedules_common
 from .main.controller.schedules_date import api as schedules_date
+from .main.controller.medicines import api as medicines
 from .main.controller.oauth import api as oauth 
 from .main.controller.test import api as test
 
@@ -14,6 +15,8 @@ api = Api(blueprint,
           description='a boilerplate for flask restplus (restx) web service'
           )
 
+
+api.add_namespace(medicines, path='/medicines')
 api.add_namespace(schedules_common, path='/schedules-commons')
 api.add_namespace(schedules_date, path='/schedules-dates')
 api.add_namespace(oauth, path="/oauth/kakao") 

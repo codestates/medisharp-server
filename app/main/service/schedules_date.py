@@ -80,20 +80,20 @@ def get_alarms_list(data):
   """ Get Alarms List on Clicked date for main page and calendar page"""
   try:
     alarmdate = datetime.datetime.strptime(data['date'], '%Y-%m-%d')
-    try:
-      token = request.headers.get('Authorization')
-      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      user_id = decoded_token['id']
-      if decoded_token:
 
-        """
-        schedules_date와 schedules_common을 innerjoin하여서 
-        schedules_date에서는 check, time
-        schedules_common에서는 title, cycle, memo
-        데이터를 가져와야한다. 
-        """
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
+
+    if decoded_token:
+      """
+      schedules_date와 schedules_common을 innerjoin하여서 
+      schedules_date에서는 check, time
+      schedules_common에서는 title, cycle, memo
+      데이터를 가져와야한다. 
+      """
       # reference: https://www.youtube.com/watch?v=_HIY1lZKEw0
-      data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.year==year, Schedules_date.month==month,Schedules_date.date==date, Schedules_date.user_id==user_id)).all() 
+      data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
 
       results = []
       for el in data:

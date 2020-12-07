@@ -39,13 +39,13 @@ def get_monthly_checked(data):
   try: 
     start_day = datetime.datetime.strptime(data['start_day'], '%Y-%m-%d')
     end_day = datetime.datetime.strptime(data['end_day'], '%Y-%m-%d')
+
     try: 
-      user_id = 1
-      # token = request.headers.get('Authorization')
-      # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      # user_id = decoded_token['id']
-      # if decoded_token:
-      if user_id:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      
+      if decoded_token:
         topic_fields = {
           'alarmdate': DateFormat(readonly=True, description='Date in DD', default='DD'),
           'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),

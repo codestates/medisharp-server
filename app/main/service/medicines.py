@@ -15,29 +15,34 @@ from ..config import jwt_key, jwt_alg
 def post_medicine(data):
   """ Gost medicine information"""
   try:
-    token = request.headers.get('Authorization')
-    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    user_id = decoded_token['id']
-    if decoded_token:
-      for el in data:
-        new_medicine = Medicines(
-          name=el['name'], 
-          title=el['title'],
-          image_dir=el['image_dir'],
-          effect=el['effect'],
-          capacity=el['capacity'],
-          validity=el['validity'],
-          camera=el['camera']
-          )
-        print('new_medicine: ', new_medicine)
-        db.session.add(new_medicine)
-      db.session.commit()
-      response_object = {
-        'status': 'OK',
-        'message': 'Successfully get monthly checked.',
-      }
-      return response_object, 200
-    else:
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        medicine_ids = []
+        for el in data:
+          new_medicine = Medicines(
+            name=el['name'], 
+            title=el['title'],
+            image_dir=el['image_dir'],
+            effect=el['effect'],
+            capacity=el['capacity'],
+            validity=el['validity'],
+            camera=el['camera']
+            )
+          db.session.add(new_medicine)
+          db.session.commit()
+          medicine_ids.append(new_medicine.id)
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get monthly checked.',
+          'medicine_id': medicine_ids
+        }
+        return response_object, 200
+    except Exception as e:
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

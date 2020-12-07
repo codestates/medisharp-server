@@ -95,7 +95,7 @@ def post_schedules_date(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-  
+
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',

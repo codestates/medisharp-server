@@ -19,6 +19,7 @@ class TimeFormat(fields.Raw):
     def format(self, value):
         return datetime.time.strftime(value, "%H:%M")
 
+
 class DateFormat(fields.Raw):
     def format(self, value):
         return datetime.datetime.strftime(value, "%d")
@@ -75,11 +76,6 @@ def get_monthly_checked(data):
     return response_object, 500
 
 
-"""
-client가 params에 
-today: 2020-11-22 12:23:00
-와 같은 형태로 get 요청을 한다는 가정하에 구현
-"""
 def get_alarms_list(data): 
   """ Get Alarms List on Clicked date for main page and calendar page"""
   try:
@@ -106,7 +102,7 @@ def get_alarms_list(data):
       for el in data:
         result = {}
         result['check'] = el.check
-        result['time'] = time.strftime(el.time, "%H:%M")
+        result['time'] = datetime.time.strftime(el.time, "%H:%M")
         result['title'] = el.title
         result['cycle'] = el.cycle
         result['memo'] = el.memo
@@ -136,26 +132,30 @@ def get_alarms_list(data):
 
 def get_today_checked(data): 
   """ Get today checked API for calendar"""
-  try:
-    start_day_parsing = re.split('-| ', data['start_day']) 
-    end_day_parsing = re.split('-| ', data['end_day']) 
+  try: 
+    start_day = datetime.datetime.strptime(data['start_day'], '%Y-%m-%d')
+    end_day = datetime.datetime.strptime(data['end_day'], '%Y-%m-%d')
+    try: 
+      token = request.headers.get('Authorization')
 
-    token = request.headers.get('Authorization')
-    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    user_id = decoded_token['id']
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
 
-    if decoded_token:
-      topic_fields = {
-        'check': fields.Boolean(required=True),
-      }
-      data = [marshal(topic, topic_fields) for topic in Schedules_date.query.filter(and_(Schedules_date.year.between(start_day_parsing[0], end_day_parsing[0]), Schedules_date.month.between(start_day_parsing[1], end_day_parsing[1]), Schedules_date.date.between(start_day_parsing[2], end_day_parsing[2]), Schedules_date.user_id==user_id)).all()]
-      response_object = {
-        'status': 'OK',
-        'message': 'Successfully get today checked.',
-        'results': data
-      }
-      return response_object, 200
-    else:
+      if decoded_token:
+
+        topic_fields = {
+          'check': fields.Boolean(required=True),
+        }
+        data = [marshal(topic, topic_fields) for topic in Schedules_date.query
+                                                                        .filter(and_(Schedules_date.alarmdate.between(start_day, end_day), Schedules_date.user_id==user_id))
+                                                                        .all()]
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get today checked.',
+          'results': data
+        }
+        return response_object, 200
+    except Exception as e:
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

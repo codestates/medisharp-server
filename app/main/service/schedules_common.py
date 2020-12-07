@@ -14,7 +14,6 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
-
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
@@ -103,3 +102,4 @@ def post_schedules_date(results):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+

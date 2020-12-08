@@ -80,38 +80,34 @@ def get_alarms_list(data):
   """ Get Alarms List on Clicked date for main page and calendar page"""
   try:
     alarmdate = datetime.datetime.strptime(data['date'], '%Y-%m-%d')
-
-    token = request.headers.get('Authorization')
-    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-    user_id = decoded_token['id']
-
-    if decoded_token:
-      """
-      schedules_date와 schedules_common을 innerjoin하여서 
-      schedules_date에서는 check, time
-      schedules_common에서는 title, cycle, memo
-      데이터를 가져와야한다. 
-      """
-      # reference: https://www.youtube.com/watch?v=_HIY1lZKEw0
-      data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
-
-      results = []
-      for el in data:
-        result = {}
-        result['check'] = el.check
-        result['time'] = datetime.time.strftime(el.time, "%H:%M")
-        result['title'] = el.title
-        result['cycle'] = el.cycle
-        result['memo'] = el.memo
-        results.append(result)
-
-      results = sorting_time(results)
-      response_object = {
-        'status': 'OK',
-        'message': 'Successfully get monthly checked.',
-        'results': results
-      }
-      return response_object, 200
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        """
+        schedules_date와 schedules_common을 innerjoin하여서 
+        schedules_date에서는 check, time
+        schedules_common에서는 title, cycle, memo
+        데이터를 가져와야한다. 
+        """
+        data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all() 
+        results = []
+        for el in data:
+          result = {}
+          result['check'] = el.check
+          result['time'] = datetime.time.strftime(el.time, "%H:%M")
+          result['title'] = el.title
+          result['cycle'] = el.cycle
+          result['memo'] = el.memo
+          results.append(result)
+        results = sorting_time(results)
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get monthly checked.',
+          'results': results
+        }
+        return response_object, 200
     except Exception as e:
       response_object = {
         'status': 'fail',

@@ -31,9 +31,21 @@ api = MedicineDto.api
 }
 라고 생각하고 구현
 """
-@api.route('')
-class PostMedicine(Resource):
+@api.route('/upload')
+class UploadMedicine(Resource):
   def post(self):
     """Post Medicine API"""
-    data = request.get_json().get('medicine') 
-    return post_medicine(data)
+    print("request: ", request.files)
+    if 'image' not in request.files:
+      print('No File Part')
+    file = request.files['image']
+    if file.filename == '':
+      print('No Selected File')
+    elif file and file.filename:
+      filename = secure_filename(file.filename)
+      filestr = request.files['image'].read()
+      print('file:',file)
+      print('filename:',filename)
+      print('type:',file.content_type)
+      #print('filestr:',filestr)
+      return upload_medicine(file)

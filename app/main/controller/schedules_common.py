@@ -21,7 +21,7 @@ client에서
   "schedules_common":
     {
       "medicine_id": [1, 2, 3],
-      "schedules__common_id": 1, 
+      "schedules_common_id": 1, 
       "time": 11:30:00
     }
 }
@@ -35,3 +35,4 @@ class PostSchedulesDate(Resource):
     """Post Schedules Date API"""
     data = request.get_json().get('schedules_common') 
     return post_schedules_date(data) 
+

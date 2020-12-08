@@ -120,4 +120,3 @@ def post_schedules_date(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
-

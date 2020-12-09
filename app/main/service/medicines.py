@@ -42,7 +42,7 @@ def post_medicine(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully post medicine information.',
           'medicine_id': medicine_ids
         }
         return response_object, 200
@@ -62,7 +62,7 @@ def post_medicine(data):
 
 
 def upload_medicine(data):
-  """ Gost medicine information"""
+  """ Upload medicine information"""
   try:
     try:
       token = request.headers.get('Authorization')

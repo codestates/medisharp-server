@@ -39,7 +39,7 @@ def post_schedules_common(data):
         }
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully Post Common information of alarm.',
           'results': results
         }
         return response_object, 200
@@ -81,8 +81,6 @@ def post_schedules_date(data):
         #비교연산자로 기저조건을 걸어주고 주기 계산
         currdate = startdate
         while currdate <= enddate:
-          currdate = currdate + datetime.timedelta(days=cycle)
-          print("date: ", currdate)
           #이를 schedules_date 테이블에 넣어주기
           new_schedules_date = Schedules_date(
             alarmdate = currdate,
@@ -93,6 +91,7 @@ def post_schedules_date(data):
           )
           db.session.add(new_schedules_date)
           db.session.commit()
+          currdate = currdate + datetime.timedelta(days=cycle)
 
         #response는 medicine_id와 schedules_common_id
         results = {

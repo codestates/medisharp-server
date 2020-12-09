@@ -42,7 +42,7 @@ def post_medicine(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully post medicine information.',
           'medicine_id': medicine_ids
         }
         return response_object, 200
@@ -62,7 +62,7 @@ def post_medicine(data):
 
 
 def upload_medicine(data):
-  """ Gost medicine information"""
+  """ Upload medicine information"""
   try:
     try:
       token = request.headers.get('Authorization')
@@ -92,18 +92,18 @@ def upload_medicine(data):
 
         #print(image_L_url)
         return image_L_url, 200
-     except Exception as e:
-       response_object = {
+    except Exception as e:
+      response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
-       }
-       return response_object, 401
-   except Exception as e:  
+      }
+      return response_object, 401
+  except Exception as e:  
     response_object = {
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
-     }
-     return response_object, 500
+    }
+    return response_object, 500
 
 
 def post_schedules_common_medicines(data):

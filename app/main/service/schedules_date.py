@@ -104,7 +104,7 @@ def get_alarms_list(data):
         results = sorting_time(results)
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully Get Alarms List on Clicked date for main page and calendar page.',
           'results': results
         }
         return response_object, 200

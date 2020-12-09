@@ -153,7 +153,7 @@ def get_schedules_common(data):
         results.append(result)
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully get schedule common info.',
           'results': results
         }
         return response_object, 200

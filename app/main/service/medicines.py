@@ -2,10 +2,9 @@
 # medicines 테이블에 관련된 쿼리문 작성하는 파일
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
-from sqlalchemy import and_
+from sqlalchemy import and_ , create_engine
 from PIL import Image
 import json ,io
-from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 import jwt
 from datetime import time
@@ -104,6 +103,60 @@ def upload_medicine(data):
       'message': 'Some Internal Server Error occurred.',
     }
     return response_object, 500
+
+
+def get_schedules_common_medicines(data):
+  """Get Clicked day Medicines by schedules_common_id | medicines_id in schedules_medicines table 
+  Because that model exists, I wrote the query statement directly, not the ORM syntax.
+  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+  """
+  try:
+    schedules_common_id = data['schedules_common_id']
+
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+        #query = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
+        query = text("""SELECT medicines_id FROM schedules_medicines WHERE schedules_common_id = :each_schedules_common_id""")
+        
+        with engine.connect() as con:
+          result = con.execute(query, {'each_schedules_common_id': schedules_common_id})
+        
+        medicines_id = [row[0] for row in result]
+        
+        topic_fields = {
+        'name': fields.String(required=True),
+        }
+        results = []
+        for id in medicines_id:
+          data = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.id==id)).all()]
+          results.append(data[0])
+
+        print(results)
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get clicked day medicines name.',
+          'results': results
+        }
+        return response_object, 200
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+      
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 
 def post_schedules_common_medicines(data):

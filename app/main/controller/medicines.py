@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import MedicineDto
 import requests
-from ..service.medicines import post_medicine
+from ..service.medicines import post_medicine, get_my_medicine_camera_info
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
@@ -35,5 +35,12 @@ api = MedicineDto.api
 class PostMedicine(Resource):
   def post(self):
     """Post Medicine API"""
+    data = request.get_json().get('medicine') 
+    return post_medicine(data)
+
+@api.route('/name/camera/true')
+class GetMyMedicineCamaraInfo(Resource):
+  def get(self):
+    """Get My Medicine Camera Info API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)

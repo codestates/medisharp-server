@@ -5,7 +5,7 @@ from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_
 import json
 import jwt
-from datetime import time, datetime, timedelta
+import datetime
 from operator import itemgetter
 from app.main import db
 from app.main.model.schedules_common import Schedules_common
@@ -39,7 +39,7 @@ def post_schedules_common(data):
         }
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get monthly checked.',
+          'message': 'Successfully Post Common information of alarm.',
           'results': results
         }
         return response_object, 200
@@ -58,45 +58,61 @@ def post_schedules_common(data):
       return response_object, 500
 
 
-# yyyy-mm-dd  = alarmdate 
-# common api 에서 응답을 받아서 new schedules common id 랑 time(str) 
-# id값 찾아서 /스타트엔드사이클을 가지고 오고 / 타임이랑 같이 주기 계산 / 계산결과를 alarmdate로 테이블에 넣기
-def post_schedules_date(results):
+def post_schedules_date(data):
   """ Post Schedules Date API"""
-  
   try:
-    new_schdules_common_id = results['new_shedules_common.id']
-    time = results['time']
-    
-    if new_schedules_common_id:
-      new_schedules_common_id = Schedules_common.query.filter(Schedules_common.id==id).all(),
-      startdate = Schedules_common.query.filter(Schdules_common.startdate==startdate).all(),
-      enddate = Schedules_common.query.filter(Schedules_common.enddate==enddate).all(),
-      cycle = Schedules_common.query.filter(Schedules_common.cycle==cycle).all()
-      
-      alarmdate = []
-      for cycle in range(startdate, enddate):
-        yield startdate + timedelta(days=cycle) 
-        yield alarmdate.append(days=cycle)
-  
-      results = {   
-        "alarmdate": alarmdate,      
-        "time": results['time'],
-        "check": data['check']
-      }
-      response_object = {
-        'status': 'OK',
-        'message': 'Successfully get monthly checked.',
-        'results': results
-      }
-      return response_object, 200
-    else:
-      response_object = {
-        'status': 'fail',
-        'message': 'Provide a valid auth token.',
-      }
-      return response_object, 401
-  
+    medicine_id = data['medicine_id']
+    schedules_common_id = data['schedules_common_id']
+    time = data['time']
+
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        data = db.session.query(Schedules_common.startdate, Schedules_common.enddate, Schedules_common.cycle).filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all() 
+        #일단 startdate, enddate 형변환 
+        startdate = datetime.datetime.strptime(data[0].startdate, '%Y-%m-%d')
+        enddate = datetime.datetime.strptime(data[0].enddate, '%Y-%m-%d')
+        cycle = data[0].cycle #2
+        print(startdate, enddate, cycle)
+        
+        #비교연산자로 기저조건을 걸어주고 주기 계산
+        currdate = startdate
+        while currdate <= enddate:
+          #이를 schedules_date 테이블에 넣어주기
+          new_schedules_date = Schedules_date(
+            alarmdate = currdate,
+            time = time,
+            check = 0,
+            user_id = user_id,
+            schedules_common_id = schedules_common_id
+          )
+          db.session.add(new_schedules_date)
+          db.session.commit()
+          currdate = currdate + datetime.timedelta(days=cycle)
+
+        #response는 medicine_id와 schedules_common_id
+        results = {
+          'medicine_id': medicine_id,
+          'schedules_common_id': schedules_common_id
+        }
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully post schedules date.',
+          'results': results
+        }
+        return response_object, 200
+
+    except Exception as e:
+        response_object = {
+          'status': 'fail',
+          'message': 'Provide a valid auth token.',
+        }
+        return response_object, 401
+
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',

@@ -3,15 +3,21 @@ from flask_restx import Resource
 
 from ..util.dto import Schedules_dateDto
 import requests
-from ..service.schedules_date import get_monthly_checked, get_alarms_list
-from ..service.schedules_date import get_today_checked
+from ..service.schedules_date import get_monthly_checked, get_alarms_list , get_clicked_day_checked , get_today_checked
 
 api = Schedules_dateDto.api
 _schedules_date = Schedules_dateDto.schedules_date
 
+
+@api.route('') 
+class GetClickedDayCheck(Resource): 
+  def get(self):
+    """Get Montly Checked API"""
+    data = request.args.to_dict()
+    return get_clicked_day_checked(data)
+
 @api.route('/check/month') 
-class Check(Resource):
- 
+class Check(Resource): 
   def get(self):
     """Get Montly Checked API"""
     data = request.args.to_dict()

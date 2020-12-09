@@ -35,6 +35,46 @@ def sorting_time(data):
   return data
 
 
+def get_clicked_day_checked(data): 
+  """ Get today checked API for calendar"""
+  try: 
+    schedules_common_id = data['schedules_common_id']
+    date = datetime.datetime.strptime(data['date'], '%Y-%m-%d')
+    try: 
+      token = request.headers.get('Authorization')
+
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+
+        topic_fields = {
+          'check': fields.Boolean(required=True),
+        }
+        data = [marshal(topic, topic_fields) for topic in Schedules_date.query
+                                                                        .filter(and_(Schedules_date.alarmdate==date, Schedules_date.schedules_common_id==schedules_common_id, Schedules_date.user_id==user_id))
+                                                                        .all()]
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get today checked.',
+          'results': data
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
+
+
 def get_monthly_checked(data): 
   """ Get monthly checked API for calendar"""
   try: 

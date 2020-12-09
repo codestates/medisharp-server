@@ -56,7 +56,7 @@ def get_clicked_day_checked(data):
                                                                         .all()]
         response_object = {
           'status': 'OK',
-          'message': 'Successfully get today checked.',
+          'message': 'Successfully get Clicked day checked.',
           'results': data
         }
         return response_object, 200

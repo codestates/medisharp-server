@@ -142,14 +142,22 @@ def get_schedules_common(data):
         data = [marshal(topic, topic_fields) for topic in Schedules_common.query
                                                                         .filter(and_(Schedules_common.title==title, Schedules_common.user_id==user_id))
                                                                         .all()]
-        print(data)
+        results = []
+        result = {
+          'schedules_common_id' : data[0]['id'],
+          'startdate': data[0]['startdate'],
+          'enddate': data[0]['enddate'],
+          'cycle': data[0]['cycle'],
+          'memo': data[0]['memo'],
+        }
+        results.append(result)
         response_object = {
           'status': 'OK',
           'message': 'Successfully get monthly checked.',
-          'results': data
+          'results': results
         }
         return response_object, 200
-    except Exception as e:  
+    except Exception as e:
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

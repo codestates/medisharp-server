@@ -125,7 +125,7 @@ def post_schedules_date(data):
 def get_schedules_common(data):
   """ Get Common information of alarm"""
   try:
-    title = data
+    title = data['title']
     try: 
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)

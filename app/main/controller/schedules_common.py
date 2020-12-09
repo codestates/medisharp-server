@@ -12,7 +12,7 @@ _schedules_common = Schedules_commonDto.schedules_common
 class PostSchedulesCommon(Resource):
   def get(self):
     """Get Schedules Common API"""
-    data = request.get_json().get('title') 
+    data = request.args.to_dict()
     print(data)
     return get_schedules_common(data)
 

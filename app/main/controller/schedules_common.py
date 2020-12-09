@@ -3,17 +3,26 @@ from flask_restx import Resource
 
 from ..util.dto import Schedules_commonDto
 import requests
-from ..service.schedules_common import post_schedules_common, post_schedules_date
+from ..service.schedules_common import post_schedules_common, post_schedules_date , get_schedules_common
 
 api = Schedules_commonDto.api
 _schedules_common = Schedules_commonDto.schedules_common
 
 @api.route('') 
 class PostSchedulesCommon(Resource):
+  def get(self):
+    """Get Schedules Common API"""
+    data = request.get_json().get('title') 
+    print(data)
+    return get_schedules_common(data)
+
   def post(self):
     """Post Schedules Common API"""
     data = request.get_json().get('schedules_common') 
     return post_schedules_common(data) 
+
+  
+
 
 """
 client에서 

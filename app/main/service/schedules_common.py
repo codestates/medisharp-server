@@ -14,6 +14,7 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
+
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
@@ -112,6 +113,48 @@ def post_schedules_date(data):
           'message': 'Provide a valid auth token.',
         }
         return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
+
+def get_schedules_common(data):
+  """ Get Common information of alarm"""
+  try:
+    title = data
+    try: 
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        topic_fields = {
+          'id': fields.Integer(required=True),
+          'startdate': fields.String(required=True),
+          'enddate': fields.String(required=True),
+          'cycle': fields.Integer(required=True),
+          'memo': fields.String(required=True),
+          
+        }
+        data = [marshal(topic, topic_fields) for topic in Schedules_common.query
+                                                                        .filter(and_(Schedules_common.title==title, Schedules_common.user_id==user_id))
+                                                                        .all()]
+        print(data)
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get monthly checked.',
+          'results': data
+        }
+        return response_object, 200
+    except Exception as e:  
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
 
   except Exception as e:
       response_object = {

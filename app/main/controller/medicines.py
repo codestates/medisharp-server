@@ -17,7 +17,7 @@ import jwt
 
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
@@ -112,7 +112,15 @@ class UploadMedicine(Resource):
       print('type:',file.content_type)
       #print('filestr:',filestr)
       return upload_medicine(file)
-      
+
+
+@api.route('/users-medicines')
+class PostUsersMedicines(Resource):
+  def post(self):
+    """Post Users Medicines API"""
+    data = request.get_json().get('medicines_id')
+    return post_users_medicines(data)
+
 @api.route('/schedules-medicines')
 class PostSchedulesCommonMedicines(Resource):
   def post(self):

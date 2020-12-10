@@ -69,11 +69,6 @@ def post_medicine(data):
               db.session.commit()
               medicine_ids.append(new_medicine.id)
 
-              query_insert_c_t = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
-              
-              with engine.connect() as con:
-                for each_medicine_id in medicine_ids:
-                  new_users_medicine = con.execute(query_insert_c_t, {'each_users_id': user_id, 'each_medicine_id': each_medicine_id})
           else:       
             #아이디 값을 반복문을 돌면서, DB에서 해당하는 데이터를 가지고 나오고, DB에 저장된 약을 가상의 리스트에 저장
             if el['name'] in res_name:
@@ -90,16 +85,9 @@ def post_medicine(data):
                 validity=el['validity'],
                 camera=el['camera']
                 )
-              #db.session.add(new_medicine)
-              #db.session.commit()
+              db.session.add(new_medicine)
+              db.session.commit()
               medicine_ids.append(new_medicine.id)
-
-              query_insert_c_f = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
-              
-              with engine.connect() as con:
-                for each_medicine_id in medicine_ids:
-                  new_users_medicine = con.execute(query_insert_c_f, {'each_users_id': user_id, 'each_medicine_id': each_medicine_id})
-
         response_object = {
           'status': 'OK',
           'message': 'Successfully post medicine information.',
@@ -165,6 +153,45 @@ def upload_medicine(data):
       'message': 'Some Internal Server Error occurred.',
     }
     return response_object, 500
+
+
+def post_users_medicines(data):
+  """Post Users_id | medicines_id in schedules_medicines table"""
+  try:
+    medicines_id = data['medicines_id']
+
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      
+      if decoded_token:
+        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+        query = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
+              
+        with engine.connect() as con:
+          for each_medicine_id in medicines_id:
+            new_users_medicine = con.execute(query, {'each_users_id': user_id, 'each_medicine_id': each_medicine_id})
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+      
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
 
 
 def post_schedules_common_medicines(data):

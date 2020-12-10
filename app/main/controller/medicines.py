@@ -1,3 +1,4 @@
+import flask
 from flask import request, redirect, jsonify, make_response, render_template
 from flask_restx import Resource
 from werkzeug.utils import secure_filename
@@ -19,7 +20,7 @@ from ..service.medicines import post_medicine, post_schedules_common_medicines, 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
-# 2단계 상윞폴더 경로를 추가하는 방법: https://brownbears.tistory.com/296
+# 2단계 상위폴더 경로를 추가하는 방법: https://brownbears.tistory.com/296
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
@@ -46,38 +47,41 @@ def prepare_image(image, target):
 class ImageUpload(Resource):
   def post(self):
     """카메라로 촬영한 이미지를 서버로 보내오고, 학습된 모델에서 예측결과를 client에게 전달해준는 API"""
-    print("알약 list: ", get_class_list()) #잘 찍힌다. 
-    # print("request: ", request.files)
-    # if 'image' not in request.files:
-    #     print('No File Part')
-    # file = request.files['image']
-    # if file.filename == '':
-    #     print('No Selected File')
-    # elif file and file.filename:
-    #   image = flask.request.files["image"].read()
-    #   image = Image.open(io.BytesIO(image))
+    print("알약 list: ", get_class_list()) #잘 찍힌다.
+    class_list =  get_class_list()
+    print("request: ", request.files)
+    if 'image' not in request.files:
+        print('No File Part')
+    file = request.files['image']
+    if file.filename == '':
+        print('No Selected File')
+    elif file and file.filename:
+      image = flask.request.files["image"].read()
+      image = Image.open(io.BytesIO(image))
 
-    #   # preprocess the image and prepare it for classification 
-    #   image = prepare_image(image, target=(224, 224))
+      # preprocess the image and prepare it for classification 
+      image = prepare_image(image, target=(224, 224))
 
-    #   # model
-    #   model = load_model('/Users/jeonghyeonjeong/Desktop/medisharp-server/cnn/Pill_image_pretrained_mobile_model_2.h5') 
+      print("현재 실행경로: ", os.getcwd())
+      modeldir = os.path.join(currdir+ "/cnn/Pill_image_pretrained_mobile_model_2.h5")
+      print("모델 실행 경로: ", modeldir)
+      model = load_model(modeldir)
       
-    #   # classify the input image and then initialize the list
-		# 	# of predictions to return to the client
-    #   # preds = model.predict(image)
-    #   preds = model.predict(image)
+      # classify the input image and then initialize the list
+			# of predictions to return to the client
+      preds = model.predict(image)
+      preds = model.predict(image)
 			
-    #   pred_class = np.argmax(preds, axis=-1)
-    #   prediction_result = class_list[int(pred_class)]
-    #   print("prediction: ", class_list[int(pred_class)])#prediction:  이연클래리트로마이신정500밀리그램   
+      pred_class = np.argmax(preds, axis=-1)
+      prediction_result = class_list[int(pred_class)]
+      print("prediction: ", class_list[int(pred_class)])#prediction:  이연클래리트로마이신정500밀리그램   
 
-    #   response_object = {
-    #     'status': 'OK',
-    #     'message': 'Successfully predict image class.',
-    #     'prediction': prediction_result
-    #   }
-    #   return response_object, 200
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully predict image class.',
+        'prediction': prediction_result
+      }
+      return response_object, 200
 
 @api.route('')
 class PostMedicine(Resource):

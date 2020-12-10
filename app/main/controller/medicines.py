@@ -33,29 +33,11 @@ class UploadMedicine(Resource):
       #print('filestr:',filestr)
       return upload_medicine(file)
 
-"""
-client에서
-{
-  "schedules_common_medicines":
-  {
-    "schedules_common_id": 1,
-    "medicine_id": [1, 2, 3]
-  }
-}
-이렇게 준다고 가정하고, 
-schedules_medicines 테이블에
-schedules_common_id | medicines_id
-          1         |     1
-          1         |     2
-          1         |     3
-이렇게 저장하는 것으로 구현
-"""
-
 @api.route('/users-medicines')
 class PostUsersMedicines(Resource):
   def post(self):
     """Post Users Medicines API"""
-    data = request.get_json().get('medicines_id')
+    data = request.get_json().get('medicines')
     return post_users_medicines(data)
 
 @api.route('/schedules-medicines')

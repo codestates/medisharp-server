@@ -45,40 +45,43 @@ class PredictMedicineName(Resource):
         token = request.headers.get('Authorization')
         decoded_token = jwt.decode(token, jwt_key, jwt_alg)
         user_id = decoded_token['id']
-
-        if 'image' not in request.files:
-            print('No File Part')
-        file = request.files['image']
-        if file.filename == '':
-            print('No Selected File')
-        elif file and file.filename:
-          image = flask.request.files["image"].read()
-          image = Image.open(io.BytesIO(image))
-          image = prepare_image(image, target=(224, 224))
-
-          currdir = os.getcwd()
-          modeldir = os.path.join(currdir+ "/cnn/Pill_image_pretrained_mobile_model_2.h5")
-          model = load_model(modeldir)
-
-          preds = model.predict(image)
-          pred_class = np.argmax(preds, axis=-1)
-          prediction_result = class_list[int(pred_class)]
-          print("prediction: ", class_list[int(pred_class)])
-
-          response_object = {
-            'status': 'OK',
-            'message': 'Successfully predict image class.',
-            'prediction': prediction_result
-          }
-          return response_object, 200
-
+        if decoded_token: 
+          if 'image' not in request.files:
+            response_object = {
+            'status': 'Bad Request',
+            'message': 'No File Part.',
+            }
+            return response_object, 400
+          file = request.files['image']
+          if file.filename == '':
+            response_object = {
+              'status': 'Bad Request',
+              'message': 'No Selected File.',
+              }
+            return response_object, 400
+          elif file and file.filename:
+            image = flask.request.files["image"].read()
+            image = Image.open(io.BytesIO(image))
+            image = prepare_image(image, target=(224, 224))
+            currdir = os.getcwd()
+            modeldir = os.path.join(currdir+ "/cnn/Pill_image_pretrained_mobile_model_2.h5")
+            model = load_model(modeldir)
+            preds = model.predict(image)
+            pred_class = np.argmax(preds, axis=-1)
+            prediction_result = class_list[int(pred_class)]
+            print("prediction: ", class_list[int(pred_class)])
+            response_object = {
+              'status': 'OK',
+              'message': 'Successfully predict image class.',
+              'prediction': prediction_result
+            }
+            return response_object, 200
       except Exception as e:  
         response_object = {
           'status': 'fail',
           'message': 'Provide a valid auth token.',
         }
         return response_object, 401
-
     except Exception as e:
         response_object = {
           'status': 'Internal Server Error',

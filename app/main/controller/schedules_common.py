@@ -9,14 +9,14 @@ api = Schedules_commonDto.api
 _schedules_common = Schedules_commonDto.schedules_common
 
 @api.route('') 
-class PostSchedulesCommon(Resource):
+class SchedulesCommon(Resource):
   def post(self):
     """Post Schedules Common API"""
     data = request.get_json().get('schedules_common') 
     return post_schedules_common(data) 
 
   def patch(self):
-    """Post Schedules Common API"""
+    """Patch Schedules Common API"""
     data = request.get_json().get('schedules_common') 
     return edit_schedules_common(data)
 

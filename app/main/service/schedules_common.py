@@ -92,7 +92,7 @@ def edit_schedules_common(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully Post Common information of alarm.',
+          'message': 'Successfully Edit Common information of alarm.',
         }
         return response_object, 200
     except Exception as e:  

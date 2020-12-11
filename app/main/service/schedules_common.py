@@ -60,35 +60,27 @@ def post_schedules_common(data):
 def edit_schedules_common(data):
   """ Edit Common information of alarm"""
   try:
+    schedules_common_id = data['schedules_common_id']
     try: 
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
       if decoded_token:
+        #우선 저장되어있는 데이터 select 해오기
+        #saved_schedule = Schedules_common.query.filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).first()
+        
+        for key in data.keys():
+          if not key == "schedules_common_id" and not key == "time":
+            schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
+            db.session.commit()
 
-        
-        new_schedules_common = Schedules_common(
-          title=data['title'], 
-          memo=data['memo'],
-          startdate=data['startdate'],
-          enddate=data['enddate'],
-          cycle=data['cycle'],
-          user_id=user_id,
-          )
-        db.session.add(new_schedules_common)
-        db.session.commit() 
-        
-        results = {
-          "new_schedules_common_id": new_schedules_common.id,
-          "time": data['time']
-        }
         response_object = {
           'status': 'OK',
           'message': 'Successfully Post Common information of alarm.',
-          'results': results
         }
         return response_object, 200
     except Exception as e:  
+      print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

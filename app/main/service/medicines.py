@@ -189,6 +189,7 @@ def post_users_medicines(data):
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
+        'results' : req_medicines_id
       }
       return response_object, 401
       

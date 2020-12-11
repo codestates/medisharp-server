@@ -89,10 +89,14 @@ def edit_schedules_common(data):
         #   if not key == "schedules_common_id" and not key == "time":
         #     schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
         #     db.session.commit()
+        results = {
+          "time": data['time']
+        }
 
         response_object = {
           'status': 'OK',
           'message': 'Successfully Edit Common information of alarm.',
+          'results' : results,
         }
         return response_object, 200
     except Exception as e:  

@@ -49,8 +49,6 @@ def post_medicine(data):
         for el in data:
           """카메라로 촬영된 경우에는, 유저 id 상관 없이(즉 다른 사람 user id로 등록된 약이더라도) 그냥 중복이 되면 안됩니다! 왜냐면 약에 대한 정보들은 공공API에서 불러오므로
           등록 유저 상관 없이 같은 약이면 모든 정보가 같을 것이니까요"""
-          """직접등록한 경우에는 유저마다 구분을 지어줘야 합니다. 같은 약이름으로 지정하더라도 유저마다 직접 등록 시에 약에 대한 정보를 다르게 입력했을 경우가 높으니 구분해주어야 합니다."""
-
           if el['camera']:
             saved_medi = Medicines.query.filter_by(name=el['name']).first()
             #카메라로 촬영된 약 정보가 이미 DB에 있다면 DB에 있는 id 값만 결과 list에 append

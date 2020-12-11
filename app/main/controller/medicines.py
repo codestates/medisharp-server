@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import MedicineDto
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, get_my_medicine_camera_info
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicine_camera_info
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
@@ -57,6 +57,13 @@ schedules_common_id | medicines_id
           1         |     3
 이렇게 저장하는 것으로 구현
 """
+
+@api.route('/users-medicines')
+class PostUsersMedicines(Resource):
+  def post(self):
+    """Post Users Medicines API"""
+    data = request.get_json().get('medicines_id')
+    return post_users_medicines(data)
 
 @api.route('/schedules-medicines')
 class PostSchedulesCommonMedicines(Resource):

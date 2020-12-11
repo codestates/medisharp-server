@@ -57,6 +57,51 @@ def post_schedules_common(data):
       }
       return response_object, 500
 
+def edit_schedules_common(data):
+  """ Edit Common information of alarm"""
+  try:
+    try: 
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+
+        
+        new_schedules_common = Schedules_common(
+          title=data['title'], 
+          memo=data['memo'],
+          startdate=data['startdate'],
+          enddate=data['enddate'],
+          cycle=data['cycle'],
+          user_id=user_id,
+          )
+        db.session.add(new_schedules_common)
+        db.session.commit() 
+        
+        results = {
+          "new_schedules_common_id": new_schedules_common.id,
+          "time": data['time']
+        }
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Post Common information of alarm.',
+          'results': results
+        }
+        return response_object, 200
+    except Exception as e:  
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
 
 def post_schedules_date(data):
   """ Post Schedules Date API"""
@@ -119,3 +164,5 @@ def post_schedules_date(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
+

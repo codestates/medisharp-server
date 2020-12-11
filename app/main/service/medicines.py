@@ -25,24 +25,25 @@ def post_medicine(data):
       user_id = decoded_token['id']
 
       if decoded_token:
+        """직접등록하는 약에 대한 분기 코드는 비활성화 하겠습니다만, 저의 노고가(저 혼자) 아까워서 삭제는 안할게용 ㅠㅠ"""
         #현재 로그인된 유저아이디 값으로 등록된 모든 약의 아이디 값을 가져옴
-        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        query_find_medi_id = text("""SELECT medicines_id FROM users_medicines WHERE users_id = :each_users_id""")
-        with engine.connect() as con:
-          result = con.execute(query_find_medi_id, {'each_users_id': user_id})
-        medicines_id = [row[0] for row in result]
+        # engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+        # query_find_medi_id = text("""SELECT medicines_id FROM users_medicines WHERE users_id = :each_users_id""")
+        # with engine.connect() as con:
+        #   result = con.execute(query_find_medi_id, {'each_users_id': user_id})
+        # medicines_id = [row[0] for row in result]
 
-        #그리고 유저가 등록한 약들 중, 카메라로 촬영되지 않은 약만 가져온다.
-        res = []
-        res_name = []
-        for medicine_id in medicines_id:
-            saved_medi = Medicines.query.filter(and_(Medicines.id==medicine_id, Medicines.camera==0)).first()
-            if saved_medi:
-              saved = {saved_medi.name : medicine_id}
-              #saved[saved_medi.name] = medicine_id
-              res_name.append(saved_medi.name)
-              res.append(saved)
-        print('res:', res)
+        # #그리고 유저가 등록한 약들 중, 카메라로 촬영되지 않은 약만 가져온다.
+        # res = []
+        # res_name = []
+        # for medicine_id in medicines_id:
+        #     saved_medi = Medicines.query.filter(and_(Medicines.id==medicine_id, Medicines.camera==0)).first()
+        #     if saved_medi:
+        #       saved = {saved_medi.name : medicine_id}
+        #       #saved[saved_medi.name] = medicine_id
+        #       res_name.append(saved_medi.name)
+        #       res.append(saved)
+        # print('res:', res)
 
         medicine_ids = []
         for el in data:
@@ -71,23 +72,22 @@ def post_medicine(data):
 
           else:       
             #아이디 값을 반복문을 돌면서, DB에서 해당하는 데이터를 가지고 나오고, DB에 저장된 약을 가상의 리스트에 저장
-            if el['name'] in res_name:
-              for res_id in res:
-                if el['name'] in res_id:
-                  medicine_ids.append(res_id[el['name']])
-            else:
-              new_medicine = Medicines(
-                name=el['name'], 
-                title=el['title'],
-                image_dir=el['image_dir'],
-                effect=el['effect'],
-                capacity=el['capacity'],
-                validity=el['validity'],
-                camera=el['camera']
-                )
-              db.session.add(new_medicine)
-              db.session.commit()
-              medicine_ids.append(new_medicine.id)
+            # if el['name'] in res_name:
+            #   for res_id in res:
+            #     if el['name'] in res_id:
+            #       medicine_ids.append(res_id[el['name']])
+            new_medicine = Medicines(
+              name=el['name'], 
+              title=el['title'],
+              image_dir=el['image_dir'],
+              effect=el['effect'],
+              capacity=el['capacity'],
+              validity=el['validity'],
+              camera=el['camera']
+              )
+            db.session.add(new_medicine)
+            db.session.commit()
+            medicine_ids.append(new_medicine.id)
         response_object = {
           'status': 'OK',
           'message': 'Successfully post medicine information.',

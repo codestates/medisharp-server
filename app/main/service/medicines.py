@@ -182,7 +182,7 @@ def post_users_medicines(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+          'message': 'Successfully post users_common_id, medicines_id in users_medicines table.',
         }
         return response_object, 200
     except Exception as e:

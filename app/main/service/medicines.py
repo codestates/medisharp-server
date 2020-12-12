@@ -325,7 +325,7 @@ def post_schedules_common_medicines(data):
       return response_object, 500
 
 
-def get_my_medicines(data):
+def get_my_medicines():
   """ Get my medicines Information"""
   try:
     try:
@@ -334,13 +334,12 @@ def get_my_medicines(data):
       user_id = decoded_token['id']
 
       if decoded_token:
-        data = db.session.query(Medicines.name, Medicines.camera).all() 
-        results = []
-        for el in data:
-          result = {}
-          result['name'] = el.name
-          result['camera'] = el.camera
-          results.append(result)
+        #reference: https://stackoverflow.com/questions/12593421/sqlalchemy-and-flask-how-to-query-many-to-many-relationship
+        topic_fields = {
+          'name': fields.String(required=True),
+          'camera': fields.Boolean(required=True),
+        }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.taker.any(id=user_id)).all()]
 
         response_object = {
           'status': 'OK',

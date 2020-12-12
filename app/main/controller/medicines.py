@@ -8,11 +8,14 @@ api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
 @api.route('')
-class PostMedicine(Resource):
+class MedicineInfo(Resource):
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
+  def get(self):
+    """Get My Medicine API"""
+    return get_my_medicines() 
 
 @api.route('/name')
 class GetMyMedicineCamaraInfo(Resource):
@@ -71,10 +74,3 @@ class PostSchedulesCommonMedicines(Resource):
     """Post Schedules Common Medicines API"""
     data = request.get_json().get('schedules_common_medicines')
     return post_schedules_common_medicines(data)
-
-@api.route('/name/list')
-class GetMyMedicines(Resource):
-  def get(self):
-    """Get My Medicine API"""
-    data = request.args.to_dict()
-    return get_my_medicines(data)

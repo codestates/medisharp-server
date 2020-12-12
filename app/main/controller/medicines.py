@@ -8,7 +8,13 @@ api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
 @api.route('')
-class PostMedicine(Resource):
+class Medicine(Resource):
+  def get(self):
+    """Get Clicked day Medicines Through Schedules-medicines API"""
+    data = request.args.to_dict()
+    if data:
+      return get_schedules_common_medicines(data)
+
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
@@ -36,10 +42,10 @@ class UploadMedicine(Resource):
 
 @api.route('/schedules-medicines')
 class SchedulesCommonMedicines(Resource):
-  def get(self):
-    """Get Clicked day Medicines Through Schedules-medicines API"""
-    data = request.args.to_dict()
-    return get_schedules_common_medicines(data)
+  # def get(self):
+  #   """Get Clicked day Medicines Through Schedules-medicines API"""
+  #   data = request.args.to_dict()
+  #   return get_schedules_common_medicines(data)
 
   def post(self):
     """Post Schedules Common Medicines API"""

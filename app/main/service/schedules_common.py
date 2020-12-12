@@ -127,7 +127,6 @@ def get_schedules_common(data):
   try:
     title = data['title']
     schedules_common_id =data['schedules_common_id']
-    schedules_date_id = data['schedules_date_id']
     check = data['check']
     time = ['time']
     cycle = ['cycle']
@@ -145,16 +144,18 @@ def get_schedules_common(data):
           
         }
         data = [marshal(topic, topic_fields) for topic in Schedules_common.query
-                                                                        .filter(and_(Schedules_common.title==title, Schedules_common.user_id==user_id))
+                                                                        .filter(and_(Schedules_common.id == schedules_common_id,Schedules_common.user_id==user_id))
                                                                         .all()]
         results = []
         result = {
           'schedules_common_id' : schedules_common_id,
+          'title' : title,
           'startdate': data[0]['startdate'],
           'enddate': data[0]['enddate'],
           'cycle': cycle,
           'memo': memo,
-          'time': time
+          'time': time,
+          'check': check
         }
         results.append(result)
         response_object = {

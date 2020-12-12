@@ -17,7 +17,7 @@ import requests, bs4
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode, quote_plus, unquote
 import pandas as pd
-from ..config import jwt_key, jwt_alg , get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
+from ..config import jwt_key, jwt_alg #, get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
 
 
 def post_medicine(data):
@@ -324,3 +324,42 @@ def post_schedules_common_medicines(data):
       }
       return response_object, 500
 
+
+def get_my_medicines(data):
+  """ Get my medicines Information"""
+  try:
+    try:
+      # token = request.headers.get('Authorization')
+      # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      # user_id = decoded_token['id']
+
+      # if decoded_token:
+      user_id = 1
+      if user_id:
+        data = db.session.query(Medicines.name, Medicines.camera).all() 
+        results = []
+        for el in data:
+          result = {}
+          result['name'] = el.name
+          result['camera'] = el.camera
+          results.append(result)
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get my medicines.',
+          'ressults': results
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500    

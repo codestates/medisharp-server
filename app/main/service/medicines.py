@@ -119,24 +119,12 @@ def get_schedules_common_medicines(data):
       user_id = decoded_token['id']
 
       if decoded_token:
-        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        #query = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
-        query = text("""SELECT medicines_id FROM schedules_medicines WHERE schedules_common_id = :each_schedules_common_id""")
-        
-        with engine.connect() as con:
-          result = con.execute(query, {'each_schedules_common_id': schedules_common_id})
-        
-        medicines_id = [row[0] for row in result]
-        
         topic_fields = {
-        'name': fields.String(required=True),
-        }
-        results = []
-        for id in medicines_id:
-          data = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.id==id)).all()]
-          results.append(data[0])
-
+          'name': fields.String(required=True),
+          }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.timetotake.any(id=schedules_common_id)).all()]
         print(results)
+
         response_object = {
           'status': 'OK',
           'message': 'Successfully get clicked day medicines name.',

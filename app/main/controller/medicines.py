@@ -43,6 +43,6 @@ class SchedulesCommonMedicines(Resource):
 
   def post(self):
     """Post Schedules Common Medicines API"""
-    data = request.get_json().get('schedules_common_medicines')
+    data = request.args.to_dict()
     return post_schedules_common_medicines(data)
 

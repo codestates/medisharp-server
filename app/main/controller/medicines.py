@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import MedicineDto
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicine_camera_info, get_my_medicine
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicine_camera_info, get_my_medicines, get_my_medicines_write_info
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
@@ -15,11 +15,11 @@ class PostMedicine(Resource):
     return post_medicine(data)
 
 @api.route('/name')
-class GetMyMedicineCamaraInfo(Resource):
+class GetMyMedicineCameraInfo(Resource):
   def get(self):
     """Get My Medicine Camera Info API"""
     data = request.args.to_dict()
-    return get_medicine(data)
+    return get_my_medicine_camera_info(data)
     
 @api.route('/upload')
 class UploadMedicine(Resource):
@@ -77,4 +77,12 @@ class GetMyMedicines(Resource):
   def get(self):
     """Get My Medicines API"""
     data = request.args.to_dict()
-    return get_medicine(data)
+    return get_medicines(data)
+
+@api.route('/name')
+class GetMyMedicinesWriteInfo(Resource):
+  def get(self):
+    """Get My Medicines Write Info API"""
+    data = request.args.to_dict()
+    return get_my_medicines_write_info(data)
+

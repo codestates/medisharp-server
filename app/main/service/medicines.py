@@ -329,13 +329,11 @@ def get_my_medicines(data):
   """ Get my medicines Information"""
   try:
     try:
-      # token = request.headers.get('Authorization')
-      # decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      # user_id = decoded_token['id']
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
 
-      # if decoded_token:
-      user_id = 1
-      if user_id:
+      if decoded_token:
         data = db.session.query(Medicines.name, Medicines.camera).all() 
         results = []
         for el in data:

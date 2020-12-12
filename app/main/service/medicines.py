@@ -138,7 +138,14 @@ def upload_medicine(data):
         image_L_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{data.filename}_L"
 
         #print(image_L_url)
-        return image_L_url, 200
+        #return image_L_url, 200
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully upload image to S3',
+          'results' : image_L_url
+        }
+        return response_object, 200
+        
     except Exception as e:
       response_object = {
         'status': 'fail',

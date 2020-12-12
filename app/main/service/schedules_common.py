@@ -159,3 +159,41 @@ def delete_all_schedules(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
+def delete_clicked_schedules(data):
+  """ Post Schedules Date API"""
+  try:
+    schedules_common_id = data['schedules_common_id']
+    clicked_day = data['date']
+
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        results_date = Schedules_date.query.filter(and_(Schedules_date.schedules_common_id==schedules_common_id, Schedules_date.alarmdate==clicked_day)).first() 
+        print(results_date)
+        db.session.delete(results_date)
+        db.session.commit()
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully delete all schedules common and date.',
+        }
+        return response_object, 200
+
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500

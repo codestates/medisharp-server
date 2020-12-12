@@ -125,12 +125,7 @@ def post_schedules_date(data):
 def get_schedules_common(data):
   """ Get Common information of alarm"""
   try:
-    title = data['title']
     schedules_common_id =data['schedules_common_id']
-    check = data['check']
-    time = ['time']
-    cycle = ['cycle']
-    memo = ['memo']
 
     try: 
       token = request.headers.get('Authorization')
@@ -143,19 +138,19 @@ def get_schedules_common(data):
           'enddate': fields.String(required=True),
           
         }
-        data = [marshal(topic, topic_fields) for topic in Schedules_common.query
+        res_date = [marshal(topic, topic_fields) for topic in Schedules_common.query
                                                                         .filter(and_(Schedules_common.id == schedules_common_id,Schedules_common.user_id==user_id))
                                                                         .all()]
         results = []
         result = {
           'schedules_common_id' : schedules_common_id,
-          'title' : title,
-          'startdate': data[0]['startdate'],
-          'enddate': data[0]['enddate'],
-          'cycle': cycle,
-          'memo': memo,
-          'time': time,
-          'check': check
+          'title' : data['title'],
+          'startdate': res_date[0]['startdate'],
+          'enddate': res_date[0]['enddate'],
+          'cycle': data['cycle'],
+          'memo': data['memo'],
+          'time': data['time'],
+          'check': data['check']
         }
         results.append(result)
         response_object = {

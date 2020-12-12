@@ -91,10 +91,12 @@ def get_alarms_list(data):
         schedules_common에서는 title, cycle, memo
         데이터를 가져와야한다. 
         """
-        data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all() 
+        data = db.session.query(Schedules_date.check, Schedules_date.id, Schedules_date.schedules_common_id, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all() 
         results = []
         for el in data:
           result = {}
+          result['schedules_date_id'] = el.id
+          result['schedules_common_id'] = el.schedules_common_id
           result['check'] = el.check
           result['time'] = datetime.time.strftime(el.time, "%H:%M")
           result['title'] = el.title

@@ -126,17 +126,22 @@ def get_schedules_common(data):
   """ Get Common information of alarm"""
   try:
     title = data['title']
+    schedules_common_id =data['schedules_common_id']
+    schedules_date_id = data['schedules_date_id']
+    check = data['check']
+    time = ['time']
+    cycle = ['cycle']
+    memo = ['memo']
+
     try: 
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
+
       if decoded_token:
         topic_fields = {
-          'id': fields.Integer(required=True),
           'startdate': fields.String(required=True),
           'enddate': fields.String(required=True),
-          'cycle': fields.Integer(required=True),
-          'memo': fields.String(required=True),
           
         }
         data = [marshal(topic, topic_fields) for topic in Schedules_common.query
@@ -144,11 +149,12 @@ def get_schedules_common(data):
                                                                         .all()]
         results = []
         result = {
-          'schedules_common_id' : data[0]['id'],
+          'schedules_common_id' : schedules_common_id,
           'startdate': data[0]['startdate'],
           'enddate': data[0]['enddate'],
-          'cycle': data[0]['cycle'],
-          'memo': data[0]['memo'],
+          'cycle': cycle,
+          'memo': memo,
+          'time': time
         }
         results.append(result)
         response_object = {

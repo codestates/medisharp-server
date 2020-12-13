@@ -8,12 +8,15 @@ import json ,io
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 import jwt
+import bs4
 from datetime import time
 from operator import itemgetter
 from app.main import db
 from app.main.model.medicines import Medicines
 from app.main.model.users import Users
 import requests, bs4
+from lxml import html
+import xml.etree
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode, quote_plus, unquote
 import pandas as pd
@@ -379,7 +382,40 @@ def get_my_medicines_info(data):
       user_id = decoded_token['id']
       if decoded_token:
         if camera == 1:
-          pass
+          url = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService/getMdcinPrductItem'
+          MY_API_Key = unquote('9BsX8qZyDtjw%2FX%2BvqnCiehTYarMxQrCvn75lSZyO%2Bxfz27GOcQ1aQMb1VvphiY%2FEHzXERrZO9z7cgprwNvtvdQ%3D%3D')
+          queryParams = '?' + urlencode(
+            {
+              quote_plus('ServiceKey') : MY_API_Key,
+              quote_plus('item_name') : name, 
+            }
+            )
+          response = requests.get(url + queryParams).text.encode('utf-8')
+          xmlobj = bs4.BeautifulSoup(response, 'lxml-xml') 
+
+          medicines = xmlobj.findAll('item')
+          find_list = ["ITEM_NAME", "EE_DOC_DATA","UD_DOC_DATA", "VALID_TERM"]
+
+          for i in find_list:
+            for result in xmlobj.find_all(i):
+              if i == "ITEM_NAME":
+                print("약품명: ", result.text)
+              elif i == "EE_DOC_DATA":
+                for data in result.find_all("PARAGRAPH"):
+                  print("효능효과: ", data.text)
+              elif i == "UD_DOC_DATA":
+                for data in result.find_all("PARAGRAPH"):
+                  print("용법용량: ", data.text)
+              elif i == "VALID_TERM":
+                print("유효기간: ", result.text)
+          
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully get my medicines.',
+            'results': xmlobj
+          }
+          return response_object, 200
+
         else:
           topic_fields = {
             'name': fields.String(required=True, description='medicine name'),

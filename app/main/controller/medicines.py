@@ -2,24 +2,27 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import MedicineDto
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicine_camera_info, get_my_medicines, get_my_medicines_write_info
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicines_info, get_my_medicines
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
 @api.route('')
-class PostMedicine(Resource):
+class MedicineInfo(Resource):
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
+  def get(self):
+    """Get My Medicine API"""
+    return get_my_medicines()
 
 @api.route('/name')
-class GetMyMedicineCameraInfo(Resource):
+class GetMyMedicineInfo(Resource):
   def get(self):
-    """Get My Medicine Camera Info API"""
+    """Get My Medicines Info API"""
     data = request.args.to_dict()
-    return get_my_medicine_camera_info(data)
+    return get_my_medicines_info(data)   
     
 @api.route('/upload')
 class UploadMedicine(Resource):
@@ -72,17 +75,4 @@ class PostSchedulesCommonMedicines(Resource):
     data = request.get_json().get('schedules_common_medicines')
     return post_schedules_common_medicines(data)
 
-@api.route('/name/list')
-class GetMyMedicines(Resource):
-  def get(self):
-    """Get My Medicines API"""
-    data = request.args.to_dict()
-    return get_medicines(data)
-
-@api.route('/name')
-class GetMyMedicinesWriteInfo(Resource):
-  def get(self):
-    """Get My Medicines Write Info API"""
-    data = request.args.to_dict()
-    return get_my_medicines_write_info(data)
 

@@ -2,10 +2,9 @@
 # medicines 테이블에 관련된 쿼리문 작성하는 파일
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
-from sqlalchemy import and_
+from sqlalchemy import and_ , create_engine
 from PIL import Image
 import json ,io
-from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 import jwt
 from datetime import time
@@ -160,16 +159,54 @@ def upload_medicine(data):
     return response_object, 500
 
 
-def post_users_medicines(data):
-  """Post Users_id | medicines_id in schedules_medicines table"""
+def get_schedules_common_medicines(data):
+  """Get Clicked day Medicines by schedules_common_id | medicines_id in schedules_medicines table 
+  Because that model exists, I wrote the query statement directly, not the ORM syntax.
+  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+  """
   try:
-    req_medicines_id = data['medicines_id']
-
+    schedules_common_id = data['schedules_common_id']
     try:
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
+      if decoded_token:
+        topic_fields = {
+          'name': fields.String(required=True),
+          }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.timetotake.any(id=schedules_common_id)).all()]
+        print(results)
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get clicked day medicines name.',
+          'results': results
+        }
+        return response_object, 200
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+        }
+      return response_object, 401
       
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+    
+
+def post_users_medicines(data):
+  """Post Users_id | medicines_id in schedules_medicines table"""
+  try:
+    req_medicines_id = data['medicines_id']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']      
       if decoded_token:
         engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
         query = text("""SELECT medicines_id FROM users_medicines WHERE users_id = :each_users_id""")
@@ -195,15 +232,7 @@ def post_users_medicines(data):
         'status': 'fail',
         'message': 'Provide a valid auth token.',
         'results' : req_medicines_id
-      }
-      return response_object, 401
-      
-  except Exception as e:
-      response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
-      }
-      return response_object, 500
+
 
 
 

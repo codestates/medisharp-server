@@ -15,20 +15,6 @@ class PostSchedulesCommon(Resource):
     data = request.get_json().get('schedules_common') 
     return post_schedules_common(data) 
 
-"""
-client에서 
-{
-  "schedules_common":
-    {
-      "medicine_id": [1, 2, 3],
-      "schedules_common_id": 1, 
-      "time": 11:30:00
-    }
-}
-을 request에 준다고 가정하고 짠다. 
-"""
-
-
 @api.route('/schedules-dates') 
 class PostSchedulesDate(Resource):
   def post(self):

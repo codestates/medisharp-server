@@ -231,10 +231,15 @@ def post_users_medicines(data):
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
-        'results' : req_medicines_id
+      }
+      return response_object, 401
 
-
-
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 def post_schedules_common_medicines(data):
   """Post schedules_common_id | medicines_id in schedules_medicines table 

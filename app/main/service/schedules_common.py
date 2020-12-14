@@ -14,6 +14,7 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
+
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
@@ -112,6 +113,58 @@ def post_schedules_date(data):
           'message': 'Provide a valid auth token.',
         }
         return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
+
+def get_schedules_common(data):
+  """ Get Common information of alarm"""
+  try:
+    schedules_common_id =data['schedules_common_id']
+
+    try: 
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        topic_fields = {
+          'startdate': fields.String(required=True),
+          'enddate': fields.String(required=True),
+          
+        }
+        res_date = [marshal(topic, topic_fields) for topic in Schedules_common.query
+                                                                        .filter(and_(Schedules_common.id == schedules_common_id,Schedules_common.user_id==user_id))
+                                                                        .all()]
+        results = []
+        result = {
+          'schedules_common_id' : schedules_common_id,
+          'title' : data['title'],
+          'startdate': res_date[0]['startdate'],
+          'enddate': res_date[0]['enddate'],
+          'cycle': data['cycle'],
+          'memo': data['memo'],
+          'time': data['time'],
+          'check': data['check']
+        }
+        results.append(result)
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get schedule common info.',
+          'results': results
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
 
   except Exception as e:
       response_object = {

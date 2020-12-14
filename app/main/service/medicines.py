@@ -163,7 +163,7 @@ def upload_medicine(data):
 def post_users_medicines(data):
   """Post Users_id | medicines_id in schedules_medicines table"""
   try:
-    medicines_id = data['medicines_id']
+    req_medicines_id = data['medicines_id']
 
     try:
       token = request.headers.get('Authorization')
@@ -172,21 +172,29 @@ def post_users_medicines(data):
       
       if decoded_token:
         engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        query = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
+        query = text("""SELECT medicines_id FROM users_medicines WHERE users_id = :each_users_id""")
               
         with engine.connect() as con:
-          for each_medicine_id in medicines_id:
-            new_users_medicine = con.execute(query, {'each_users_id': user_id, 'each_medicine_id': each_medicine_id})
+          result = con.execute(query, {'each_users_id': user_id})
+        res_medicine_ids = [row[0] for row in result]
+
+
+        for medi_id in req_medicines_id: #client에서 전달준 약 id에 대해 반복문을 돌려서
+          if medi_id not in res_medicine_ids: #client에서 전달준 약 id가 DB에서 가지고 있는 약 ID에 없으면 등록하기
+            query_insert = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
+            with engine.connect() as con:
+              new_users_medicine = con.execute(query_insert, {'each_users_id': user_id, 'each_medicine_id': medi_id})
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+          'message': 'Successfully post users_common_id, medicines_id in users_medicines table.',
         }
         return response_object, 200
     except Exception as e:
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
+        'results' : req_medicines_id
       }
       return response_object, 401
       

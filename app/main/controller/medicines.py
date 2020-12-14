@@ -116,12 +116,11 @@ class UploadMedicine(Resource):
       #print('filestr:',filestr)
       return upload_medicine(file)
 
-
 @api.route('/users-medicines')
 class PostUsersMedicines(Resource):
   def post(self):
     """Post Users Medicines API"""
-    data = request.get_json().get('medicines_id')
+    data = request.get_json().get('medicines')
     return post_users_medicines(data)
 
 @api.route('/schedules-medicines')

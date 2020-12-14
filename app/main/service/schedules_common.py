@@ -61,7 +61,7 @@ def post_schedules_common(data):
 def post_schedules_date(data):
   """ Post Schedules Date API"""
   try:
-    medicine_id = data['medicine_id']
+    medicine_id = data['medicines_id']
     schedules_common_id = data['schedules_common_id']
     time = data['time']
 

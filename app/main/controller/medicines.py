@@ -17,7 +17,7 @@ import jwt
 
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicines_info
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
@@ -130,3 +130,12 @@ class PostSchedulesCommonMedicines(Resource):
     """Post Schedules Common Medicines API"""
     data = request.get_json().get('schedules_common_medicines')
     return post_schedules_common_medicines(data)
+
+@api.route('/name')
+class GetMyMedicineInfo(Resource):
+  def get(self):
+    """Get My Medicines Info API"""
+    """현재(2020/12/14)API 문서에 있는 Get My Medicine_camera_info와 Get My Medicine_write_info의 uri를 합쳐준 것입니다.
+    camera의 true/false에 따라 service 의 get_my_medicines_info 코드 분기가 이루어집니다. """
+    data = request.args.to_dict()
+    return get_my_medicines_info(data)

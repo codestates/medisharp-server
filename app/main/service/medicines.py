@@ -8,13 +8,19 @@ import json ,io
 from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 import jwt
+import bs4
+from lxml import html
+import xml.etree
 from datetime import time
 from operator import itemgetter
 from app.main import db
 from app.main.model.medicines import Medicines
 from app.main.model.users import Users
+from ..service.crawling import get_open_api_info
 from ..config import jwt_key, jwt_alg , get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
 
+def strToBool(s):
+  return 1 if s=='true' else 0
 
 def post_medicine(data):
   """Post medicine information"""
@@ -198,7 +204,6 @@ def post_users_medicines(data):
       return response_object, 500
 
 
-
 def post_schedules_common_medicines(data):
   """Post schedules_common_id | medicines_id in schedules_medicines table 
   Because that model exists, I wrote the query statement directly, not the ORM syntax.
@@ -240,3 +245,62 @@ def post_schedules_common_medicines(data):
       }
       return response_object, 500
 
+
+
+
+def get_my_medicines_info(data):
+  """ Get my medicines Information by myself """
+  try:
+    camera = strToBool(data['camera'])
+    name = data['name']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        if camera == 1: #camera가 true인 경우 image_dir, title, camera값은 Medicines DB에서, 나머지 validity, capacity, effect정보는 openAPI를 통해 가져옵니다. 
+          topic_fields = {
+            'title': fields.String(description='personal description for this medicines'),
+            'image_dir': fields.String(description='medicine image file path'),
+            'camera': fields.Boolean(description='Whether to register as a camera')
+          }
+          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
+          
+          results[0].update(get_open_api_info(name)) #openAPI
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully get my medicines.',
+            'results': results
+          }
+          return response_object, 200
+        else: #camera가 false인 경우 image_dir, title, camera, validity, capacity, effect정보를 Medicines DB에서 가져옵니다. 
+          topic_fields = {
+            'name': fields.String(required=True, description='medicine name'),
+            'title': fields.String(description='personal description for this medicines'),
+            'image_dir': fields.String(description='medicine image file path'),
+            'effect': fields.String(description='medicine efficacy'),
+            'capacity': fields.String(description='medicine dosage'),
+            'validity': fields.String(description='medicine validity'),
+            'camera': fields.Boolean(description='Whether to register as a camera')
+          }
+          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
+
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully get my medicines.',
+            'results': results
+          }
+          return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500 
+    

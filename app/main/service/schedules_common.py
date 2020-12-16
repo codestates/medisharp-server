@@ -14,7 +14,6 @@ from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
 import re
 
-
 def post_schedules_common(data):
   """ Post Common information of alarm"""
   try:
@@ -36,7 +35,10 @@ def post_schedules_common(data):
         
         results = {
           "new_schedules_common_id": new_schedules_common.id,
-          "time": data['time']
+          "time": data['time'], 
+          "startdate" : new_schedules_common.startdate,
+          "enddate" : new_schedules_common.enddate,
+          "cycle" : new_schedules_common.cycle
         }
         response_object = {
           'status': 'OK',
@@ -45,6 +47,7 @@ def post_schedules_common(data):
         }
         return response_object, 200
     except Exception as e:  
+      print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -62,9 +65,13 @@ def post_schedules_common(data):
 def post_schedules_date(data):
   """ Post Schedules Date API"""
   try:
-    medicine_id = data['medicines_id']
+    # medicine_id = data['medicines_id']
     schedules_common_id = data['schedules_common_id']
-    time = data['time']
+    startdate=datetime.datetime.strptime(data['startdate'], '%Y-%m-%d')
+    enddate=datetime.datetime.strptime(data['enddate'], '%Y-%m-%d')
+    cycle=data['cycle']
+    # time = data['time']
+    print(data)
 
     try:
       token = request.headers.get('Authorization')
@@ -72,12 +79,16 @@ def post_schedules_date(data):
       user_id = decoded_token['id']
 
       if decoded_token:
-        data = db.session.query(Schedules_common.startdate, Schedules_common.enddate, Schedules_common.cycle).filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all() 
+        print(user_id)
+
+        #result = db.session.query(Schedules_common.startdate, Schedules_common.enddate, Schedules_common.cycle).filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all() 
         #일단 startdate, enddate 형변환 
-        startdate = datetime.datetime.strptime(data[0].startdate, '%Y-%m-%d')
-        enddate = datetime.datetime.strptime(data[0].enddate, '%Y-%m-%d')
-        cycle = data[0].cycle #2
-        print(startdate, enddate, cycle)
+        #print(result)
+        #print(result[0])
+        # startdate = datetime.datetime.strptime(result[0].startdate, '%Y-%m-%d')
+        # enddate = datetime.datetime.strptime(result[0].enddate, '%Y-%m-%d')
+        # cycle = result[0].cycle #2
+        #print(startdate, enddate, cycle)
         
         #비교연산자로 기저조건을 걸어주고 주기 계산
         currdate = startdate
@@ -85,7 +96,7 @@ def post_schedules_date(data):
           #이를 schedules_date 테이블에 넣어주기
           new_schedules_date = Schedules_date(
             alarmdate = currdate,
-            time = time,
+            time = data['time'],
             check = 0,
             user_id = user_id,
             schedules_common_id = schedules_common_id
@@ -96,7 +107,7 @@ def post_schedules_date(data):
 
         #response는 medicine_id와 schedules_common_id
         results = {
-          'medicine_id': medicine_id,
+          'medicine_id': data['medicines_id'],
           'schedules_common_id': schedules_common_id
         }
 
@@ -108,6 +119,7 @@ def post_schedules_date(data):
         return response_object, 200
 
     except Exception as e:
+        print(e)
         response_object = {
           'status': 'fail',
           'message': 'Provide a valid auth token.',

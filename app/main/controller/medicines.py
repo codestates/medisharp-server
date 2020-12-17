@@ -8,7 +8,7 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines_info
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info
 import numpy as np
 # import cv2
 import os

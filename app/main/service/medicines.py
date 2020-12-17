@@ -3,15 +3,18 @@
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_ , create_engine
-from PIL import Image
-import json ,io
 from sqlalchemy.sql import text
-import jwt
-import bs4
-from lxml import html
-import xml.etree
+from PIL import Image
 from datetime import time
 from operator import itemgetter
+import json ,io
+import jwt
+import requests, bs4
+from lxml import html
+import xml.etree
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode, quote_plus, unquote
+
 from app.main import db
 from app.main.model.medicines import Medicines
 from app.main.model.users import Users
@@ -113,6 +116,46 @@ def post_medicine(data):
       return response_object, 500
 
 
+def post_schedules_common_medicines(data):
+  """Post schedules_common_id | medicines_id in schedules_medicines table 
+  Because that model exists, I wrote the query statement directly, not the ORM syntax.
+  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+  """
+  try:
+    schedules_common_id = data['schedules_common_id']
+    medicines_id = data['medicines_id']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+      query = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
+      each_schedules_common_id = schedules_common_id
+      with engine.connect() as con:
+        for each_medicine_id in medicines_id:
+          new_schedules_medicine = con.execute(query, {'each_schedules_common_id': each_schedules_common_id, 'each_medicine_id': each_medicine_id})
+
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+      }
+      return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
+
 def upload_medicine(data):
   """ Upload medicine information"""
   try:
@@ -203,7 +246,7 @@ def get_schedules_common_medicines(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
-    
+
 
 def post_users_medicines(data):
   """Post Users_id | medicines_id in schedules_medicines table"""
@@ -248,36 +291,27 @@ def post_users_medicines(data):
       }
       return response_object, 500
 
-def post_schedules_common_medicines(data):
-  """Post schedules_common_id | medicines_id in schedules_medicines table 
-  Because that model exists, I wrote the query statement directly, not the ORM syntax.
-  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
-  """
-  try:
-    schedules_common_id = data['schedules_common_id']
-    req_medicines_id = data['medicines_id']
 
+def get_my_medicines():
+  """ Get my medicines Information"""
+  try:
     try:
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
-      
-      if decoded_token:
-        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        query = text("""SELECT medicines_id FROM schedules_medicines WHERE schedules_common_id = :each_schedules_common_id""")
-        with engine.connect() as con:
-          result = con.execute(query, {'each_schedules_common_id': schedules_common_id})
-        res_medicine_ids = [row[0] for row in result]
 
-        for medi_id in req_medicines_id: #client에서 전달준 약 id에 대해 반복문을 돌려서
-          if medi_id not in res_medicine_ids: #client에서 전달준 약 id가 DB에서 가지고 있는 약 ID에 없으면 등록하기
-            query_insert = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
-            with engine.connect() as con:
-              new_users_medicine = con.execute(query_insert, {'each_schedules_common_id': schedules_common_id, 'each_medicine_id': medi_id})
+      if decoded_token:
+        #reference: https://stackoverflow.com/questions/12593421/sqlalchemy-and-flask-how-to-query-many-to-many-relationship
+        topic_fields = {
+          'name': fields.String(required=True),
+          'camera': fields.Boolean(required=True),
+        }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.taker.any(id=user_id)).all()]
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+          'message': 'Successfully get my medicines.',
+          'ressults': results
         }
         return response_object, 200
     except Exception as e:
@@ -286,15 +320,13 @@ def post_schedules_common_medicines(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-      
+
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
-      return response_object, 500
-
-
+      return response_object, 500     
 
 
 def get_my_medicines_info(data):
@@ -333,7 +365,6 @@ def get_my_medicines_info(data):
             'camera': fields.Boolean(description='Whether to register as a camera')
           }
           results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
-
           response_object = {
             'status': 'OK',
             'message': 'Successfully get my medicines.',
@@ -352,4 +383,3 @@ def get_my_medicines_info(data):
       'message': 'Some Internal Server Error occurred.',
     }
     return response_object, 500 
-    

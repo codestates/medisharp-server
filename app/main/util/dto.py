@@ -10,7 +10,7 @@ class Schedules_dateDto:
   })
 
 class UserDto:
-    api = Namespace('user', description='user related operations')
+    api = Namespace('users', description='user related operations')
     user = api.model('user', {
         'email': fields.String(required=True, description='user email address'),
         'full_name': fields.String(description='user full_name'),

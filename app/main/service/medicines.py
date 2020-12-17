@@ -306,13 +306,14 @@ def get_my_medicines():
           'id': fields.Integer(required=True),
           'name': fields.String(required=True),
           'camera': fields.Boolean(required=True),
+          'image_dir': fields.String(required=True)
         }
         results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.taker.any(id=user_id)).all()]
 
         response_object = {
           'status': 'OK',
           'message': 'Successfully get my medicines.',
-          'ressults': results
+          'results': results
         }
         return response_object, 200
     except Exception as e:
@@ -327,8 +328,7 @@ def get_my_medicines():
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
-      return response_object, 500     
-
+      return response_object, 500 
 
 def get_my_medicines_info(data):
   """ Get my medicines Information by myself """

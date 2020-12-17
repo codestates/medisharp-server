@@ -91,16 +91,22 @@ def get_alarms_list(data):
         schedules_common에서는 title, cycle, memo
         데이터를 가져와야한다. 
         """
-        data = db.session.query(Schedules_date.check, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.schedules_common_id == Schedules_common.id, Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all() 
+        #data = db.session.query(Schedules_date.check, Schedules_date.id, Schedules_date.schedules_common_id, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id, Schedules_common.user_id==user_id)).all() 
+        
+        data = db.session.query(Schedules_common.id,Schedules_common.title, Schedules_common.cycle, Schedules_common.memo, Schedules_date.time, Schedules_date.check).join(Schedules_common).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
+
+        print(data)
         results = []
         for el in data:
           result = {}
-          result['check'] = el.check
-          result['time'] = datetime.time.strftime(el.time, "%H:%M")
+          result['schedules_common_id'] = el.id
           result['title'] = el.title
           result['cycle'] = el.cycle
           result['memo'] = el.memo
+          result['time'] = datetime.time.strftime(el.time, "%H:%M")
+          result['check'] = el.check
           results.append(result)
+
         results = sorting_time(results)
         response_object = {
           'status': 'OK',
@@ -161,3 +167,52 @@ def get_today_checked(data):
     }
     return response_object, 500
 
+
+
+"""
+client에서 
+{
+  "schedules_common": 
+    {"schedules_common_id": 1, 
+      "clickdate": '2020-12-12',
+    }
+}
+의 형태로 보내준다고 생각하고 구현
+"""
+def patch_check(data):
+  """ Convert check False to True or True to False"""
+  try:
+    schedules_common_id = data['schedules_common_id']
+    alarmdate = datetime.datetime.strptime(data['clickdate'], '%Y-%m-%d')
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        #check가 true이면 false로, false이면 true로 update시켜주어야 하니까, 먼저 select 후 update하는 방식으로 진행
+        this_schedules_date = db.session.query(Schedules_date).filter(and_(Schedules_date.schedules_common_id==schedules_common_id,Schedules_date.alarmdate==alarmdate,Schedules_date.user_id==user_id)).first()
+        if this_schedules_date.check == True:
+          this_schedules_date.check = False
+        else:
+          this_schedules_date.check = True
+        db.session.commit()
+        response_object = {
+            'status': 'OK',
+            'message': 'Successfully Convert check False to True or True to False.',
+            'results' : {'check': this_schedules_date.check},
+          }
+        return response_object, 200
+    except Exception as e:  
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+  
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500   

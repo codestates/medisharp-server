@@ -36,8 +36,8 @@ class Schedules_commonDto:
   schedules_common = api.model('schedules_common', {
     'title': fields.String(required=True, description='Name indicating the medicine you need to take'),
     'memo': fields.String(required=True, description='Description of the alarm'),
-    'startdate': fields.Integer(required=True, description='Alarm start date'),
-    'enddate': fields.Integer(required=True, description='Alarm end date'),
+    'startdate': fields.String(required=True, description='Alarm start date'),
+    'enddate': fields.String(required=True, description='Alarm end date'),
     'cycle': fields.Integer(required=True, description='Alarm cycle'),
   })
 

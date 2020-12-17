@@ -99,7 +99,7 @@ class Medicine(Resource):
       return get_schedules_common_medicines(data)
     else:
       """Get My Medicine API"""
-      return get_my_medicines(data)
+      return get_my_medicines()
 
   def post(self):
     """Post Medicine API"""

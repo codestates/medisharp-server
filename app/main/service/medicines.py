@@ -303,6 +303,7 @@ def get_my_medicines():
       if decoded_token:
         #reference: https://stackoverflow.com/questions/12593421/sqlalchemy-and-flask-how-to-query-many-to-many-relationship
         topic_fields = {
+          'id': fields.Integer(required=True),
           'name': fields.String(required=True),
           'camera': fields.Boolean(required=True),
         }

@@ -345,7 +345,6 @@ def get_my_medicines_info(data):
           topic_fields = {
             'title': fields.String(description='personal description for this medicines'),
             'image_dir': fields.String(description='medicine image file path'),
-            'camera': fields.Boolean(description='Whether to register as a camera')
           }
           results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.id==medicine_id, Medicines.camera==camera, Medicines.name==name)).all()]
           
@@ -358,13 +357,11 @@ def get_my_medicines_info(data):
           return response_object, 200
         else: #camera가 false인 경우 image_dir, title, camera, validity, capacity, effect정보를 Medicines DB에서 가져옵니다. 
           topic_fields = {
-            'name': fields.String(required=True, description='medicine name'),
             'title': fields.String(description='personal description for this medicines'),
             'image_dir': fields.String(description='medicine image file path'),
             'effect': fields.String(description='medicine efficacy'),
             'capacity': fields.String(description='medicine dosage'),
             'validity': fields.String(description='medicine validity'),
-            'camera': fields.Boolean(description='Whether to register as a camera')
           }
           results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.id==medicine_id, Medicines.camera==camera, Medicines.name==name)).all()]
           response_object = {

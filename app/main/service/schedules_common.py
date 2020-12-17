@@ -94,7 +94,11 @@ def edit_schedules_common(data):
         #     schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
         #     db.session.commit()
         results = {
-          "time": data['time']
+          "time": data['time'],
+          "startdate" : data['startdate'],
+          "enddate" : data['enddate'],
+          "cycle" : data['cycle']
+
         }
 
         response_object = {
@@ -127,7 +131,7 @@ def post_schedules_date(data):
     startdate=datetime.datetime.strptime(data['startdate'], '%Y-%m-%d')
     enddate=datetime.datetime.strptime(data['enddate'], '%Y-%m-%d')
     cycle=data['cycle']
-    # time = data['time']
+    time = data['time']
     print(data)
 
     try:
@@ -153,7 +157,7 @@ def post_schedules_date(data):
           #이를 schedules_date 테이블에 넣어주기
           new_schedules_date = Schedules_date(
             alarmdate = currdate,
-            time = data['time'],
+            time = time,
             check = 0,
             user_id = user_id,
             schedules_common_id = schedules_common_id
@@ -195,6 +199,8 @@ def edit_schedules_date(data):
   try:
     cycle = data['cycle']
     schedules_common_id = data['schedules_common_id']
+    startdate=datetime.datetime.strptime(data['startdate'], '%Y-%m-%d')
+    enddate=datetime.datetime.strptime(data['enddate'], '%Y-%m-%d')
     time = data['time']
     try:
       token = request.headers.get('Authorization')
@@ -202,13 +208,6 @@ def edit_schedules_date(data):
       user_id = decoded_token['id']
 
       if decoded_token:
-        data = db.session.query(Schedules_common.startdate, Schedules_common.enddate, Schedules_common.cycle).filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all() 
-        startdate = datetime.datetime.strptime(data[0].startdate, '%Y-%m-%d')
-        enddate = datetime.datetime.strptime(data[0].enddate, '%Y-%m-%d')
-        cycle = data[0].cycle #2
-        print(startdate, enddate, cycle)
-        #여기까지 post와 동일
-        
         #오늘날짜
         now = datetime.datetime.now()
         today = now.strftime('%Y-%m-%d') #오늘자 기준으로 for loop 돌리기

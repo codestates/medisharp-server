@@ -19,7 +19,17 @@ def post_login(data):
       password = data['password']  
       
       if (email in Users and password in Users):
-        token = jwt.encode({"id":new_user.id}, jwt_key, jwt_alg) 
+        logined_user = Users(
+          full_name= full_name,
+          email= email,
+          password= password,
+          mobile= mobile,
+          login= 'null'
+        )
+        db.session.add(logined_user)
+        db.session.commit
+
+        token = jwt.encode({"id": logined_user.id}, jwt_key, jwt_alg) 
         token = token.decode("utf-8")     
             
         response_object = {

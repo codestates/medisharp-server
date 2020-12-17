@@ -65,7 +65,7 @@ def get_open_api_info(name):
             else:
                 effect.append(group_data['EE_DOC_DATA']['PARAGRAPH']['#text'])
         results['effect'] = effect
-
+        
     elif field == "UD_DOC_DATA":
         capacity = []
         if type(group_data["UD_DOC_DATA"])==list:
@@ -97,10 +97,10 @@ def get_open_api_info(name):
             else:
                 capacity.append(group_data['UD_DOC_DATA']['PARAGRAPH']['#text'])
         results['capacity'] = capacity
-
+        
     elif field == "ITEM_NAME":
         results['name'] = group_data["ITEM_NAME"]
-
+        
     else: 
         results['validity'] = group_data["VALID_TERM"]
 

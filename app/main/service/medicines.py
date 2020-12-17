@@ -335,6 +335,7 @@ def get_my_medicines_info(data):
   try:
     camera = strToBool(data['camera'])
     name = data['name']
+    medicine_id = data['id']
     try:
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
@@ -346,7 +347,7 @@ def get_my_medicines_info(data):
             'image_dir': fields.String(description='medicine image file path'),
             'camera': fields.Boolean(description='Whether to register as a camera')
           }
-          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
+          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.id==medicine_id, Medicines.camera==camera, Medicines.name==name)).all()]
           
           results[0].update(get_open_api_info(name)) #openAPI
           response_object = {
@@ -365,7 +366,7 @@ def get_my_medicines_info(data):
             'validity': fields.String(description='medicine validity'),
             'camera': fields.Boolean(description='Whether to register as a camera')
           }
-          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
+          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.id==medicine_id, Medicines.camera==camera, Medicines.name==name)).all()]
           response_object = {
             'status': 'OK',
             'message': 'Successfully get my medicines.',

@@ -8,6 +8,7 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines_info
 import numpy as np
 # import cv2
 import os
@@ -17,7 +18,6 @@ import jwt
 
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicines_info
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
@@ -91,7 +91,13 @@ class PredictMedicineName(Resource):
 
 
 @api.route('')
-class PostMedicine(Resource):
+class Medicine(Resource):
+  def get(self):
+    """Get Clicked day Medicines Through Schedules-medicines API"""
+    data = request.args.to_dict()
+    if data:
+      return get_schedules_common_medicines(data)
+
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
@@ -116,16 +122,20 @@ class UploadMedicine(Resource):
       #print('filestr:',filestr)
       return upload_medicine(file)
 
-
 @api.route('/users-medicines')
 class PostUsersMedicines(Resource):
   def post(self):
     """Post Users Medicines API"""
-    data = request.get_json().get('medicines_id')
+    data = request.get_json().get('medicines')
     return post_users_medicines(data)
 
 @api.route('/schedules-medicines')
-class PostSchedulesCommonMedicines(Resource):
+class SchedulesCommonMedicines(Resource):
+  # def get(self):
+  #   """Get Clicked day Medicines Through Schedules-medicines API"""
+  #   data = request.args.to_dict()
+  #   return get_schedules_common_medicines(data)
+
   def post(self):
     """Post Schedules Common Medicines API"""
     data = request.get_json().get('schedules_common_medicines')

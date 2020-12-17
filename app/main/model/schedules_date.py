@@ -14,4 +14,4 @@ class Schedules_date(db.Model):
     schedules_common_id = db.Column(db.Integer, db.ForeignKey('schedules_common.id'), nullable=False)
 
     def __repr__(self):
-        return "<schedules_date '{}'>".format(self.year)
+        return "<schedules_date '{}'>".format(self.id)

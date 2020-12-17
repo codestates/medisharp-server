@@ -2,18 +2,24 @@
 # medicines 테이블에 관련된 쿼리문 작성하는 파일
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
-from sqlalchemy import and_
+from sqlalchemy import and_ , create_engine
 from PIL import Image
 import json ,io
-from sqlalchemy import create_engine
 from sqlalchemy.sql import text
 import jwt
+import bs4
 from datetime import time
 from operator import itemgetter
 from app.main import db
 from app.main.model.medicines import Medicines
 from app.main.model.users import Users
-from ..config import jwt_key, jwt_alg , get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
+import requests, bs4
+from lxml import html
+import xml.etree
+from urllib.request import Request, urlopen
+from urllib.parse import urlencode, quote_plus, unquote
+import pandas as pd
+from ..config import jwt_key, jwt_alg#, get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
 
 
 def post_medicine(data):
@@ -108,6 +114,93 @@ def post_medicine(data):
       return response_object, 500
 
 
+def post_schedules_common_medicines(data):
+  """Post schedules_common_id | medicines_id in schedules_medicines table 
+  Because that model exists, I wrote the query statement directly, not the ORM syntax.
+  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+  """
+  try:
+    schedules_common_id = data['schedules_common_id']
+    medicines_id = data['medicines_id']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+      query = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
+      each_schedules_common_id = schedules_common_id
+      with engine.connect() as con:
+        for each_medicine_id in medicines_id:
+          new_schedules_medicine = con.execute(query, {'each_schedules_common_id': each_schedules_common_id, 'each_medicine_id': each_medicine_id})
+
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+      }
+      return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
+
+def get_my_medicine_camera_info(data):
+  """ Get my medicine camera information"""
+  try:
+    camera = data(['camera'])
+    name = data(['name'])
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        xmlUrl = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService'
+        My_API_Ket = unquote('9BsX8qZyDtjw%2FX%2BvqnCiehTYarMxQrCvn75lSZyO%2Bxfz27GOcQ1aQMb1VvphiY%2FEHzXERrZO9z7cgprwNvtvdQ%3D%3D')
+        queryParams = '?' + urlencode(
+          {
+            quote_plus('ServiceKey') : My_API_Key,
+            quote_plus('item_name') : '',
+            quote_plus('entp_no') : '',
+            quote_plus('pageNo') : '',
+            quote_plus('numOfRows') : '',
+          }
+        )
+        response = {
+          a: request.get(xmlUrl + queryParams).text.encode('utf-8')
+        }
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get monthly checked.',
+          'response': response
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500        
+
+
 def upload_medicine(data):
   """ Upload medicine information"""
   try:
@@ -138,7 +231,14 @@ def upload_medicine(data):
         image_L_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{data.filename}_L"
 
         #print(image_L_url)
-        return image_L_url, 200
+        #return image_L_url, 200
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully upload image to S3',
+          'results' : image_L_url
+        }
+        return response_object, 200
+        
     except Exception as e:
       response_object = {
         'status': 'fail',
@@ -153,34 +253,36 @@ def upload_medicine(data):
     return response_object, 500
 
 
-def post_users_medicines(data):
-  """Post Users_id | medicines_id in schedules_medicines table"""
+def get_schedules_common_medicines(data):
+  """Get Clicked day Medicines by schedules_common_id | medicines_id in schedules_medicines table 
+  Because that model exists, I wrote the query statement directly, not the ORM syntax.
+  reference: https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+  """
   try:
-    medicines_id = data['medicines_id']
-
+    schedules_common_id = data['schedules_common_id']
     try:
       token = request.headers.get('Authorization')
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
-      
       if decoded_token:
-        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        query = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
-              
-        with engine.connect() as con:
-          for each_medicine_id in medicines_id:
-            new_users_medicine = con.execute(query, {'each_users_id': user_id, 'each_medicine_id': each_medicine_id})
+        topic_fields = {
+          'name': fields.String(required=True),
+          }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.timetotake.any(id=schedules_common_id)).all()]
+        print(results)
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully post schedules_common_id, medicines_id in schedules_medicines table.',
+          'message': 'Successfully get clicked day medicines name.',
+          'results': results
         }
         return response_object, 200
     except Exception as e:
+      print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
-      }
+        }
       return response_object, 401
       
   except Exception as e:
@@ -189,8 +291,50 @@ def post_users_medicines(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+    
+
+def post_users_medicines(data):
+  """Post Users_id | medicines_id in schedules_medicines table"""
+  try:
+    req_medicines_id = data['medicines_id']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']      
+      if decoded_token:
+        engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
+        query = text("""SELECT medicines_id FROM users_medicines WHERE users_id = :each_users_id""")
+              
+        with engine.connect() as con:
+          result = con.execute(query, {'each_users_id': user_id})
+        res_medicine_ids = [row[0] for row in result]
 
 
+        for medi_id in req_medicines_id: #client에서 전달준 약 id에 대해 반복문을 돌려서
+          if medi_id not in res_medicine_ids: #client에서 전달준 약 id가 DB에서 가지고 있는 약 ID에 없으면 등록하기
+            query_insert = text("""INSERT INTO users_medicines(users_id, medicines_id) VALUES (:each_users_id, :each_medicine_id)""")
+            with engine.connect() as con:
+              new_users_medicine = con.execute(query_insert, {'each_users_id': user_id, 'each_medicine_id': medi_id})
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully post users_common_id, medicines_id in users_medicines table.',
+          'results' : req_medicines_id
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 def post_schedules_common_medicines(data):
   """Post schedules_common_id | medicines_id in schedules_medicines table 
@@ -199,7 +343,7 @@ def post_schedules_common_medicines(data):
   """
   try:
     schedules_common_id = data['schedules_common_id']
-    medicines_id = data['medicines_id']
+    req_medicines_id = data['medicines_id']
 
     try:
       token = request.headers.get('Authorization')
@@ -208,11 +352,16 @@ def post_schedules_common_medicines(data):
       
       if decoded_token:
         engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
-        query = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
-        each_schedules_common_id = schedules_common_id
+        query = text("""SELECT medicines_id FROM schedules_medicines WHERE schedules_common_id = :each_schedules_common_id""")
         with engine.connect() as con:
-          for each_medicine_id in medicines_id:
-            new_schedules_medicine = con.execute(query, {'each_schedules_common_id': each_schedules_common_id, 'each_medicine_id': each_medicine_id})
+          result = con.execute(query, {'each_schedules_common_id': schedules_common_id})
+        res_medicine_ids = [row[0] for row in result]
+
+        for medi_id in req_medicines_id: #client에서 전달준 약 id에 대해 반복문을 돌려서
+          if medi_id not in res_medicine_ids: #client에서 전달준 약 id가 DB에서 가지고 있는 약 ID에 없으면 등록하기
+            query_insert = text("""INSERT INTO schedules_medicines(schedules_common_id, medicines_id) VALUES (:each_schedules_common_id, :each_medicine_id)""")
+            with engine.connect() as con:
+              new_users_medicine = con.execute(query_insert, {'each_schedules_common_id': schedules_common_id, 'each_medicine_id': medi_id})
 
         response_object = {
           'status': 'OK',
@@ -233,3 +382,123 @@ def post_schedules_common_medicines(data):
       }
       return response_object, 500
 
+def get_my_medicines():
+  """ Get my medicines Information"""
+  try:
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      if decoded_token:
+        #reference: https://stackoverflow.com/questions/12593421/sqlalchemy-and-flask-how-to-query-many-to-many-relationship
+        topic_fields = {
+          'name': fields.String(required=True),
+          'camera': fields.Boolean(required=True),
+        }
+        results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.taker.any(id=user_id)).all()]
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully get my medicines.',
+          'ressults': results
+        }
+        return response_object, 200
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500     
+
+
+def strToBool(s):
+  if s == 'true':
+    return 1
+  else:
+    return 0
+
+
+def get_my_medicines_info(data):
+  """ Get my medicines Information by myself """
+  try:
+    camera = strToBool(data['camera'])
+    name = data['name']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        if camera == 1:
+          url = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService/getMdcinPrductItem'
+          MY_API_Key = unquote('9BsX8qZyDtjw%2FX%2BvqnCiehTYarMxQrCvn75lSZyO%2Bxfz27GOcQ1aQMb1VvphiY%2FEHzXERrZO9z7cgprwNvtvdQ%3D%3D')
+          queryParams = '?' + urlencode(
+            {
+              quote_plus('ServiceKey') : MY_API_Key,
+              quote_plus('item_name') : name, 
+            }
+            )
+          response = requests.get(url + queryParams).text.encode('utf-8')
+          xmlobj = bs4.BeautifulSoup(response, 'lxml-xml') 
+
+          medicines = xmlobj.findAll('item')
+          find_list = ["ITEM_NAME", "EE_DOC_DATA","UD_DOC_DATA", "VALID_TERM"]
+
+          for i in find_list:
+            for result in xmlobj.find_all(i):
+              if i == "ITEM_NAME":
+                print("약품명: ", result.text)
+              elif i == "EE_DOC_DATA":
+                for data in result.find_all("PARAGRAPH"):
+                  print("효능효과: ", data.text)
+              elif i == "UD_DOC_DATA":
+                for data in result.find_all("PARAGRAPH"):
+                  print("용법용량: ", data.text)
+              elif i == "VALID_TERM":
+                print("유효기간: ", result.text)
+          
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully get my medicines.',
+            'results': xmlobj
+          }
+          return response_object, 200
+
+        else:
+          topic_fields = {
+            'name': fields.String(required=True, description='medicine name'),
+            'title': fields.String(description='personal description for this medicines'),
+            'image_dir': fields.String(description='medicine image file path'),
+            'effect': fields.String(description='medicine efficacy'),
+            'capacity': fields.String(description='medicine dosage'),
+            'validity': fields.String(description='medicine validity'),
+            'camera': fields.Boolean(description='Whether to register as a camera')
+          }
+          results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.taker.any(id=user_id), Medicines.camera==camera, Medicines.name==name)).all()]
+  
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully get my medicines.',
+            'results': results
+          }
+          return response_object, 200
+
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500

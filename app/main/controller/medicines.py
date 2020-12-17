@@ -8,7 +8,7 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicine, get_my_medicines_info
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info
 import numpy as np
 # import cv2
 import os
@@ -93,23 +93,19 @@ class PredictMedicineName(Resource):
 @api.route('')
 class Medicine(Resource):
   def get(self):
-    """Get Clicked day Medicines Through Schedules-medicines API"""
     data = request.args.to_dict()
     if data:
+      """Get Clicked day Medicines Through Schedules-medicines API"""
       return get_schedules_common_medicines(data)
+    else:
+      """Get My Medicine API"""
+      return get_my_medicines()
 
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
 
-@api.route('/name')
-class GetMyMedicineCamaraInfo(Resource):
-  def get(self):
-    """Get My Medicine Camera Info API"""
-    data = request.args.to_dict()
-    return get_medicine(data)
-    
 @api.route('/upload')
 class UploadMedicine(Resource):
   def post(self):
@@ -148,9 +144,11 @@ class SchedulesCommonMedicines(Resource):
     data = request.get_json().get('schedules_common_medicines')
     return post_schedules_common_medicines(data)
 
-@api.route('/name/list')
-class GetMyMedicines(Resource):
+@api.route('/name')
+class GetMyMedicineInfo(Resource):
   def get(self):
-    """Get My Medicines API"""
+    """Get My Medicines Info API"""
+    """현재(2020/12/14)API 문서에 있는 Get My Medicine_camera_info와 Get My Medicine_write_info의 uri를 합쳐준 것입니다.
+    camera의 true/false에 따라 service 의 get_my_medicines_info 코드 분기가 이루어집니다. """
     data = request.args.to_dict()
-    return get_medicine(data)
+    return get_my_medicines_info(data)

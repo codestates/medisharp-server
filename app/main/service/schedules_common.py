@@ -179,7 +179,7 @@ def delete_clicked_schedules(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully delete all schedules common and date.',
+          'message': 'Successfully delete clicked day schedules common and date.',
         }
         return response_object, 200
 

@@ -93,10 +93,13 @@ class PredictMedicineName(Resource):
 @api.route('')
 class Medicine(Resource):
   def get(self):
-    """Get Clicked day Medicines Through Schedules-medicines API"""
     data = request.args.to_dict()
     if data:
+      """Get Clicked day Medicines Through Schedules-medicines API"""
       return get_schedules_common_medicines(data)
+    else:
+      """Get My Medicine API"""
+      return get_my_medicines(data)
 
   def post(self):
     """Post Medicine API"""

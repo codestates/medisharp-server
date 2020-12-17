@@ -18,7 +18,7 @@ class Check(Resource):
     return get_monthly_checked(data)
 
 
-@api.route('/schedules-commons/alarm/today')
+@api.route('/schedules-commons/alarm')
 class TodayAlarmList(Resource):
   def get(self):
     """Get Alarms List on Clicked date"""

@@ -61,6 +61,63 @@ def post_schedules_common(data):
       }
       return response_object, 500
 
+def edit_schedules_common(data):
+  """ Edit Common information of alarm"""
+  try:
+    schedules_common_id = data['schedules_common_id']
+    try: 
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        # 1. 전체 데이터 넘어오고 서버에서 변경된 것만 update 해주는 경우
+        #우선 저장되어있는 데이터 select 해오기
+        topic_fields = {
+          'title' : fields.String(required=True),
+          'startdate': fields.String(required=True),
+          'enddate': fields.String(required=True),
+          'cycle': fields.Integer(required=True),
+          'memo': fields.String(required=True),
+        }
+        saved_schedule = [marshal(topic, topic_fields) for topic in Schedules_common.query.filter(and_(Schedules_common.id==schedules_common_id, Schedules_common.user_id==user_id)).all()]
+        print(saved_schedule[0])
+        # 전달받아온 데이터를 for 문을 돌면서, 해당 DB에서 대조하지 않아도 되는 키값은 제외하고, 각 value 비교해서 달라진 경우만 update
+        for key in data.keys():
+          if not key == "schedules_common_id" and not key == "time":
+            if not data[key] == saved_schedule[0][key]:
+              schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
+              db.session.commit()
+        
+        # 2. client에서 변경된 데이터만 전달해줄 수 있는 경우
+        # for key in data.keys():
+        #   if not key == "schedules_common_id" and not key == "time":
+        #     schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
+        #     db.session.commit()
+        results = {
+          "time": data['time']
+        }
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Edit Common information of alarm.',
+          'results' : results,
+        }
+        return response_object, 200
+    except Exception as e:  
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
 
 def post_schedules_date(data):
   """ Post Schedules Date API"""
@@ -132,6 +189,7 @@ def post_schedules_date(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
 
 def get_schedules_common(data):
   """ Get Common information of alarm"""
@@ -262,4 +320,5 @@ def delete_clicked_schedules(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
 

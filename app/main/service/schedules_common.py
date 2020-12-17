@@ -184,7 +184,6 @@ def get_schedules_common(data):
       }
       return response_object, 500
 
-
 def delete_all_schedules(data):
   """ Post Schedules Date API"""
   try:
@@ -263,3 +262,4 @@ def delete_clicked_schedules(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+

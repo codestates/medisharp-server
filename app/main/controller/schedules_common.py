@@ -36,3 +36,4 @@ class SchedulesDate(Resource):
     else:
       return delete_clicked_schedules(data)
 
+

@@ -8,19 +8,18 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines, get_my_medicines_info, get_my_medicines
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines_info
 import numpy as np
 # import cv2
 import os
 import sys
 import io
 import jwt
+
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine, post_users_medicines
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
-
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
@@ -92,22 +91,18 @@ class PredictMedicineName(Resource):
 
 
 @api.route('')
-class MedicineInfo(Resource):
+class Medicine(Resource):
+  def get(self):
+    """Get Clicked day Medicines Through Schedules-medicines API"""
+    data = request.args.to_dict()
+    if data:
+      return get_schedules_common_medicines(data)
+
   def post(self):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
-  def get(self):
-    """Get My Medicine API"""
-    return get_my_medicines()
 
-@api.route('/name')
-class GetMyMedicineInfo(Resource):
-  def get(self):
-    """Get My Medicines Info API"""
-    data = request.args.to_dict()
-    return get_my_medicines_info(data)   
-    
 @api.route('/upload')
 class UploadMedicine(Resource):
   def post(self):
@@ -127,20 +122,30 @@ class UploadMedicine(Resource):
       #print('filestr:',filestr)
       return upload_medicine(file)
 
-
 @api.route('/users-medicines')
 class PostUsersMedicines(Resource):
   def post(self):
     """Post Users Medicines API"""
-    data = request.get_json().get('medicines_id')
+    data = request.get_json().get('medicines')
     return post_users_medicines(data)
 
 @api.route('/schedules-medicines')
-class PostSchedulesCommonMedicines(Resource):
+class SchedulesCommonMedicines(Resource):
+  # def get(self):
+  #   """Get Clicked day Medicines Through Schedules-medicines API"""
+  #   data = request.args.to_dict()
+  #   return get_schedules_common_medicines(data)
+
   def post(self):
     """Post Schedules Common Medicines API"""
     data = request.get_json().get('schedules_common_medicines')
     return post_schedules_common_medicines(data)
 
-
-
+@api.route('/name')
+class GetMyMedicineInfo(Resource):
+  def get(self):
+    """Get My Medicines Info API"""
+    """현재(2020/12/14)API 문서에 있는 Get My Medicine_camera_info와 Get My Medicine_write_info의 uri를 합쳐준 것입니다.
+    camera의 true/false에 따라 service 의 get_my_medicines_info 코드 분기가 이루어집니다. """
+    data = request.args.to_dict()
+    return get_my_medicines_info(data)

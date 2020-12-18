@@ -6,6 +6,7 @@ from sqlalchemy import and_ , create_engine
 import json ,io
 from sqlalchemy.sql import text
 import jwt
+import bcrypt
 from app.main import db
 from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg , get_s3_connection, S3_BUCKET, S3_REGION, DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
@@ -17,19 +18,11 @@ def post_login(data):
     try:
       email = data['email']
       password = data['password']  
-      
-      if (email in Users and password in Users):
-        logined_user = Users(
-          full_name= full_name,
-          email= email,
-          password= password,
-          mobile= mobile,
-          login= 'null'
-        )
-        db.session.add(logined_user)
-        db.session.commit
+      password = bycrypt.checkpw(password.encode("utf-8")
 
-        token = jwt.encode({"id": logined_user.id}, jwt_key, jwt_alg) 
+      user = Users.query.filter_by(email=email, password=password).first()
+      if user:
+        token = jwt.encode({"id": user.id}, jwt_key, jwt_alg) 
         token = token.decode("utf-8")     
             
         response_object = {
@@ -42,7 +35,7 @@ def post_login(data):
       print(e)
       response_object = {
         'status': 'fail',
-        'message': 'Provide a valid auth token.',
+        'message': 'Unvalid User.',
       }
       return response_object, 401
       

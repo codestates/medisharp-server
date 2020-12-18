@@ -15,7 +15,6 @@ import os
 import sys
 import io
 import jwt
-
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
@@ -94,7 +93,7 @@ class PredictMedicineName(Resource):
 class Medicine(Resource):
   def get(self):
     data = request.args.to_dict()
-    if data:
+    if data['schedules_common_id']:
       """Get Clicked day Medicines Through Schedules-medicines API"""
       return get_schedules_common_medicines(data)
     else:

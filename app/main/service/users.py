@@ -18,7 +18,7 @@ def post_login(data):
     try:
       email = data['email']
       password = data['password']  
-      password = bycrypt.checkpw(password.encode("utf-8")
+      password = bycrypt.checkpw(password.encode("utf-8"))
 
       user = Users.query.filter_by(email=email, password=password).first()
       if user:

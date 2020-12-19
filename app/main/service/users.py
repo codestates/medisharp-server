@@ -5,7 +5,7 @@ from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_ 
 import json
 import jwt
-from flask_bcrypt import bcrypt
+import flask_bcrypt
 from app.main import db
 from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg 
@@ -17,23 +17,29 @@ def post_login(data):
     try:
       email = data['email']
       password = data['password'] 
-      pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()) 
 
-      user = Users.query.filter(and_(Users.email==email, Users.password==pw_hash)).first()
+      user = Users.query.filter_by(email=email).first()
       if user:
-        token = jwt.encode({"id": user.id}, jwt_key, jwt_alg) 
-        token = token.decode("utf-8")     
+        if flask_bcrypt.check_password_hash(user.password, password):
+          token = jwt.encode({"id": user.id}, jwt_key, jwt_alg) 
+          token = token.decode("utf-8")     
 
-        response_object = {
-          'status': 'OK',
-          'message': 'Successfully post login.',
-          'Authorization': token
-        }
-        return response_object, 200
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully post login.',
+            'Authorization': token
+          }
+          return response_object, 200
+        else:
+          response_object = {
+          'status': 'fail',
+          'message': 'Unvalid user password.',
+          }
+          return response_object, 401
       else:
         response_object = {
           'status': 'fail',
-          'message': 'Unvalid User.',
+          'message': 'Unvalid user email.',
         }
         return response_object, 401
     except Exception as e:

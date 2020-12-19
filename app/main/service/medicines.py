@@ -22,8 +22,6 @@ from app.main.model.users import Users
 from ..service.crawling import get_open_api_info
 from ..config import jwt_key, jwt_alg , get_s3_connection, S3_BUCKET, S3_REGION, ProductionConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
 
-Session = sessionmaker()
-
 
 def strToBool(s):
   return 1 if s=='true' else 0

@@ -93,7 +93,7 @@ class PredictMedicineName(Resource):
 class Medicine(Resource):
   def get(self):
     data = request.args.to_dict()
-    if data['schedules_common_id']:
+    if data:
       """Get Clicked day Medicines Through Schedules-medicines API"""
       return get_schedules_common_medicines(data)
     else:

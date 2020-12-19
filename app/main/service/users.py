@@ -8,6 +8,7 @@ from ..config import jwt_key, jwt_alg, MAIL_SENDER, MAIL_SENDER_PASSWORD
 from string import punctuation, ascii_letters, digits
 import random
 from flask_mail import Message, Mail
+import flask_bcrypt
 
 app = create_app('dev')
 
@@ -66,6 +67,38 @@ def get_find_user(data):
       response_object = {
         'status': 'fail',
         'message': '일치하는 회원 정보가 없습니다.',
+      }
+      return response_object, 400
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
+def edit_temp_pw(data):
+  """Get Find User API"""
+  try:
+    try:
+      user_id = data['id']
+      temp_pw = data['password']
+      temp_pw_hash = flask_bcrypt.generate_password_hash(temp_pw)
+
+      pw_changed = Users.query.filter_by(id =user_id).update({'password': temp_pw_hash})
+      db.session.commit()
+
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully changed to temporary password.',
+      }
+      return response_object, 200
+    except Exception as e:
+      print(e)
+      db.session.rollback()
+      response_object = {
+        'status': 'fail',
+        'message': 'fail to change password.',
       }
       return response_object, 400
 

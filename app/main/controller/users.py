@@ -8,7 +8,7 @@ from flask_restx import Resource
 
 from ..util.dto import UserDto
 import requests
-from ..service.users import social_signin, get_find_user
+from ..service.users import social_signin, get_find_user , edit_temp_pw
 from ..config import kakao_client_id
 
 api = UserDto.api
@@ -19,6 +19,13 @@ class GetFindUser(Resource):
     """Get User Id and Send temporary password"""
     data = request.args.to_dict()
     return get_find_user(data)
+
+@api.route('/password')
+class EditPassword(Resource):
+  def patch(self):
+    """Edit temporary password"""
+    data = request.get_json().get('users')
+    return edit_temp_pw(data)
 
 @api.route("/oauth/kakao") 
 class KakaoSignIn(Resource):

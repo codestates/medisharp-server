@@ -8,7 +8,7 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info, delete_my_medicines
 import numpy as np
 # import cv2
 import os
@@ -105,6 +105,11 @@ class Medicine(Resource):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
+
+  def delete(self):
+    """Delete User Medicine API"""
+    data = request.get_json().get('medicine')
+    return delete_my_medicines(data)
 
 @api.route('/upload')
 class UploadMedicine(Resource):

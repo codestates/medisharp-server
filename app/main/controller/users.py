@@ -17,7 +17,7 @@ api = UserDto.api
 class KakaoSignIn(Resource):
     def get(self):
         client_id = kakao_client_id
-        redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
+        redirect_uri = "http://127.0.0.1:5000/users/oauth/kakao/callback"
         kakao_oauthurl = f"https://kauth.kakao.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code"
         return redirect(kakao_oauthurl)
 

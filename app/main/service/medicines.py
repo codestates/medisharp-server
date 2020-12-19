@@ -400,3 +400,42 @@ def get_my_medicines_info(data):
       'message': 'Some Internal Server Error occurred.',
     }
     return response_object, 500 
+
+
+def delete_my_medicines(data):
+  """ Delete my medicines API """
+  try:
+    name = data['name']
+    medicine_id = data['id']
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        medicine_obj = db.session.query(Medicines).filter(and_(
+          Medicines.id==id,
+          Medicines.name==name,
+          Medicines.title==title,
+          Medicines.image_dir==image_dir,
+          Medicines.effect==effect,
+          Medicines.capacity==capacity,
+          Medicines.validity==validity,
+          Medicines.camera==camera
+          )).all()
+
+        db.session.delete(medicine_obj)
+        db.session.commit()
+        return response_object, 200
+ 
+    except Exception as e:
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500 

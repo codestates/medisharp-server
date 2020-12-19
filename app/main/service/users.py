@@ -44,7 +44,7 @@ def get_find_id(data):
       print(e)
       response_object = {
         'status': 'fail',
-        'message': '일치하는 회원 정보가 없습니다. 회원가입 혹은 소셜로그인을 시도해보세요.',
+        'message': 'Unvaild Info. Try to Sign up or Social Login.',
       }
       return response_object, 404
 

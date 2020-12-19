@@ -381,4 +381,42 @@ def get_my_medicines_info(data):
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
     }
-    return response_object, 500 
+    return response_object, 500
+
+
+def edit_my_medicines(data):
+  """ Edit My Medicines API """
+  try:
+    medicine_id = data['id']
+    #print(medicine_id)
+    try:
+        token = request.headers.get('Authorization')
+        decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+        user_id = decoded_token['id']
+
+        if decoded_token:
+          edited_medicine = db.session.query(Medicines).filter(Medicines.id == medicine_id).update(data)
+          db.session.commit()
+          print("edited medicine: ", edited_medicine)
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully Edit My Medicines.',
+            'results': edited_medicine
+            }
+          return response_object, 200
+
+    except Exception as e:
+      print(e)
+      db.session.rollback()
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500 

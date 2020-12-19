@@ -15,22 +15,17 @@ def get_find_id(data):
     try:
       full_name = data['full_name']
       mobile = data['mobile']
-      mobile_db = db.session.query(Users.mobile).filter_by(full_name=full_name).all()
-      print(mobile_db)
-      print(flask_bcrypt.check_password_hash(mobile_db[1][0], mobile))
+      mobile_db = db.session.query(Users.mobile).filter(and_(Users.full_name==full_name, Users.login=='basic')).first()
+      #print(mobile_db)
+      #print(flask_bcrypt.check_password_hash(mobile_db[0], mobile))
 
-      result = None
-
-      for el in mobile_db:
-        if flask_bcrypt.check_password_hash(el[0], mobile):
-          email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==el[0])).first() 
-          result = email
-
-      if result is not None:
+      if flask_bcrypt.check_password_hash(mobile_db[0], mobile):
+        email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==mobile_db[0],Users.login=='basic')).first() 
+        print(email)
         response_object = {
           'status': 'OK',
           'message': 'Successfully Get Find ID.',
-          'email': result
+          'email': email
         }
         return response_object, 200
       else:

@@ -19,7 +19,9 @@ def delete_user_info(data):
     decoded_token = jwt.decode(token, jwt_key, jwt_alg)
     user_id = decoded_token['id']
     if decoded_token:
-      session.clear()
+      user_obj = db.session.query(Users).filter(Users.id==user_id).first()
+      db.session.delete(user_obj)
+      db.session.commit()
 
       response_object = {
         'status': 'OK',

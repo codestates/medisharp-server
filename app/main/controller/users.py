@@ -29,7 +29,7 @@ class KakaoSignInCallback(Resource):
         try:
             code = request.args.get("code")                                 
             client_id = kakao_client_id
-            redirect_uri = "http://127.0.0.1:5000/oauth/kakao/callback"
+            redirect_uri = "http://127.0.0.1:5000/users/oauth/kakao/callback"
             
             token_request = requests.get(                                       
                 f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={client_id}&redirect_uri={redirect_uri}&code={code}"

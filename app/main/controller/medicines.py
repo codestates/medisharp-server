@@ -21,18 +21,29 @@ from ..util.dto import MedicineDto
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
+interpreter = None
+
+#Load TFLite model and allocate tensors.
+def load_model():
+  global interpreter
+  currdir = os.getcwd()
+  print("currdir: ", currdir)
+  modeldir = os.path.join(currdir+"/cnn/model/medisharp_tflite_model.tflite")
+  interpreter = tf.lite.Interpreter(model_path=modeldir)
+
+print(("* Loading Keras model and Flask starting server..."
+		"please wait until server has fully started"))
+load_model()
+
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
 def prepare_image(image, target):
 	if image.mode != "RGB":
 		image = image.convert("RGB")
-
 	image = image.resize(target)
 	image = img_to_array(image)
 	image = np.expand_dims(image, axis=0)
-	image = imagenet_utils.preprocess_input(image)
-
 	return image
 
 @api.route('/image')
@@ -60,10 +71,6 @@ class PredictMedicineName(Resource):
               }
             return response_object, 400
           elif file and file.filename:
-            currdir = os.getcwd()
-            #Load TFLite model and allocate tensors.
-            modeldir = os.path.join(currdir+"/cnn/model/medisharp_tflite_model.tflite")
-            interpreter = tf.lite.Interpreter(model_path=modeldir)
             interpreter.allocate_tensors()
             #Get input and output tensors.
             input_details = interpreter.get_input_details()

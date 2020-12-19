@@ -15,23 +15,29 @@ def get_find_id(data):
     try:
       full_name = data['full_name']
       mobile = data['mobile']
-      mobile_db = db.session.query(Users.mobile).filter(and_(Users.full_name==full_name, Users.login=='basic')).first()
-      #print(mobile_db)
+      mobile_db = db.session.query(Users.mobile).filter(and_(Users.full_name==full_name, Users.login=='basic')).all()
+      print(mobile_db)
       #print(flask_bcrypt.check_password_hash(mobile_db[0], mobile))
 
-      if flask_bcrypt.check_password_hash(mobile_db[0], mobile):
-        email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==mobile_db[0],Users.login=='basic')).first() 
-        print(email)
+      result = None
+
+      for el in mobile_db:
+        if flask_bcrypt.check_password_hash(el[0], mobile):
+          email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==el[0],Users.login=='basic')).first() 
+          print(email)
+          result = email
+
+      if result:    
         response_object = {
           'status': 'OK',
           'message': 'Successfully Get Find ID.',
-          'email': email
+          'email': result
         }
         return response_object, 200
       else:
         response_object = {
         'status': 'fail',
-        'message': '일치하는 회원 정보가 없습니다. 회원가입 혹은 소셜로그인을 시도해보세요.',
+        'message': 'Unvaild Info. Try to Sign up or Social Login',
         }
         return response_object, 404
     except Exception as e:

@@ -388,7 +388,6 @@ def edit_my_medicines(data):
   """ Edit My Medicines API """
   try:
     medicine_id = data['id']
-    #print(medicine_id)
     try:
         token = request.headers.get('Authorization')
         decoded_token = jwt.decode(token, jwt_key, jwt_alg)
@@ -397,7 +396,7 @@ def edit_my_medicines(data):
         if decoded_token:
           edited_medicine = db.session.query(Medicines).filter(Medicines.id == medicine_id).update(data)
           db.session.commit()
-          print("edited medicine: ", edited_medicine)
+          
           response_object = {
             'status': 'OK',
             'message': 'Successfully Edit My Medicines.',

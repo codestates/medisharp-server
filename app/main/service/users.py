@@ -21,9 +21,9 @@ def post_logout(data):
       user_id = decoded_token['id']
    
       if decoded_token:
-        session.pop('email', None)
+        session.clear()    
         return redirect('/')
-            
+
         response_object = {
           'status': 'OK',
           'message': 'Successfully post logout.',

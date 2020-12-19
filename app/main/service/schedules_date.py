@@ -46,7 +46,7 @@ def get_monthly_checked(data):
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
       
-      if decoded_token:
+      if decoded_token: 
         topic_fields = {
           'alarmdate': DateFormat(readonly=True, description='Date in DD', default='DD'),
           'time': TimeFormat(readonly=True, description='Time in HH:MM', default='HH:MM'),
@@ -56,6 +56,7 @@ def get_monthly_checked(data):
                                                                         .filter(and_(Schedules_date.alarmdate>=start_day, Schedules_date.alarmdate<end_day, Schedules_date.user_id==user_id))
                                                                         .all()]
         results = sorting_alarmdate_time(data)
+        print('test')
         response_object = {
           'status': 'OK',
           'message': 'Successfully get monthly checked.',
@@ -69,6 +70,7 @@ def get_monthly_checked(data):
       }
       return response_object, 401
   except Exception as e:
+    print(e)
     response_object = {
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
@@ -115,6 +117,7 @@ def get_alarms_list(data):
         }
         return response_object, 200
     except Exception as e:
+      print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -140,15 +143,17 @@ def get_today_checked(data):
       user_id = decoded_token['id']
 
       if decoded_token:
-
+        print('get today checked')
         topic_fields = {
           'check': fields.Boolean(required=True),
         }
         data = [marshal(topic, topic_fields) for topic in Schedules_date.query
                                                                         .filter(and_(Schedules_date.alarmdate.between(start_day, end_day), Schedules_date.user_id==user_id))
                                                                         .all()]
-        response_object = {
-          'status': 'OK',
+                                                                        
+        print(data)
+        response_object = { 
+          'status': 'OK', 
           'message': 'Successfully get today checked.',
           'results': data
         }
@@ -185,25 +190,26 @@ def patch_check(data):
     schedules_common_id = data['schedules_common_id']
     alarmdate = datetime.datetime.strptime(data['clickdate'], '%Y-%m-%d')
     try:
-      token = request.headers.get('Authorization')
-      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      user_id = decoded_token['id']
-      if decoded_token:
-        #check가 true이면 false로, false이면 true로 update시켜주어야 하니까, 먼저 select 후 update하는 방식으로 진행
-        this_schedules_date = db.session.query(Schedules_date).filter(and_(Schedules_date.schedules_common_id==schedules_common_id,Schedules_date.alarmdate==alarmdate,Schedules_date.user_id==user_id)).first()
-        if this_schedules_date.check == True:
-          this_schedules_date.check = False
-        else:
-          this_schedules_date.check = True
-        db.session.commit()
-        response_object = {
-            'status': 'OK',
-            'message': 'Successfully Convert check False to True or True to False.',
-            'results' : {'check': this_schedules_date.check},
-          }
-        return response_object, 200
+        token = request.headers.get('Authorization')
+        decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+        user_id = decoded_token['id']
+        if decoded_token:
+          #check가 true이면 false로, false이면 true로 update시켜주어야 하니까, 먼저 select 후 update하는 방식으로 진행
+          this_schedules_date = db.session.query(Schedules_date).filter(and_(Schedules_date.schedules_common_id==schedules_common_id,Schedules_date.alarmdate==alarmdate,Schedules_date.user_id==user_id)).first()
+          if this_schedules_date.check == True:
+            this_schedules_date.check = False
+          else:
+            this_schedules_date.check = True
+          db.session.commit()
+          response_object = {
+              'status': 'OK',
+              'message': 'Successfully Convert check False to True or True to False.',
+              'results' : {'check': this_schedules_date.check},
+            }
+          return response_object, 200
     except Exception as e:  
       print(e)
+      db.session.rollback()
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

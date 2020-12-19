@@ -8,10 +8,17 @@ from flask_restx import Resource
 
 from ..util.dto import UserDto
 import requests
-from ..service.users import social_signin
+from ..service.users import social_signin, get_find_id
 from ..config import kakao_client_id
 
 api = UserDto.api
+
+@api.route('/email')
+class GetFindID(Resource):
+  def get(self):
+    """Get Find ID"""
+    data = request.args.to_dict()
+    return get_find_id(data)
 
 @api.route("/oauth/kakao") 
 class KakaoSignIn(Resource):

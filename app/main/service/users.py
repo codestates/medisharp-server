@@ -1,11 +1,58 @@
 from flask import request, redirect
 import jwt
+import flask_bcrypt
+from sqlalchemy import and_ 
 
 from app.main import db
 from app.main.model.users import Users
 
 from ..config import jwt_key, jwt_alg
 
+def get_find_id(data):
+  """Get Find ID API"""
+  try:
+    print(data)
+    try:
+      full_name = data['full_name']
+      mobile = data['mobile']
+      mobile_db = db.session.query(Users.mobile).filter_by(full_name=full_name).all()
+      print(mobile_db)
+      print(flask_bcrypt.check_password_hash(mobile_db[1][0], mobile))
+
+      result = None
+
+      for el in mobile_db:
+        if flask_bcrypt.check_password_hash(el[0], mobile):
+          email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==el[0])).first() 
+          result = email
+
+      if result is not None:
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Get Find ID.',
+          'email': result
+        }
+        return response_object, 200
+      else:
+        response_object = {
+        'status': 'fail',
+        'message': '일치하는 회원 정보가 없습니다. 회원가입 혹은 소셜로그인을 시도해보세요.',
+        }
+        return response_object, 404
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': '일치하는 회원 정보가 없습니다. 회원가입 혹은 소셜로그인을 시도해보세요.',
+      }
+      return response_object, 404
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500  
 
 
 def social_signin(data):

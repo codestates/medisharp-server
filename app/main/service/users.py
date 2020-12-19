@@ -20,12 +20,12 @@ def delete_user_info(data):
     user_id = decoded_token['id']
     if decoded_token:
       user_obj = db.session.query(Users).filter(and_(
-        User.id==user_id,
-        User.full_name==full_name,
-        User.email==email,
-        User.password==password,
-        User.mobile==mobile,
-        User.login==login
+        Users.id==id,
+        Users.full_name==full_name,
+        Users.email==email,
+        Users.password==password,
+        Users.mobile==mobile,
+        Users.login==login
         )).all()
 
       db.session.delete(user_obj)

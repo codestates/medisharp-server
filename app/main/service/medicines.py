@@ -400,3 +400,64 @@ def get_my_medicines_info(data):
       'message': 'Some Internal Server Error occurred.',
     }
     return response_object, 500 
+
+
+
+def edit_my_medicines(data):
+  """ Edit My Medicines API """
+  try:
+    medicine_id = data['id']
+    #print(medicine_id)
+    try:
+        token = request.headers.get('Authorization')
+        decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+        user_id = decoded_token['id']
+
+        if decoded_token:
+          topic_fields = {
+            'name' : fields.String(required=True), 
+            'title' : fields.String(required=True),
+            'image_dir' : fields.String(required=True),
+            'effect' : fields.String(required=True),
+            'capacity' : fields.String(required=True),
+            'validity' : fields.String(required=True),
+          }
+          new_medicine = [marshal(topic, topic_fields) for topic in Medicines.query.filter(and_(Medicines.id==medicine_id, Medicines.user_id==user_id)).all()]
+         # print('sfjsl=',  new_medicine[0])
+          for key in data.keys():
+            if not key == "medicines_id" and not key == "camera":
+              if not data[key] == new_medicine[0][key]:
+                medicine = Medicines.query.filter_by(id = medicine_id).update({key: data[key]})
+                db.session.commit()          
+
+          results = {
+            "name": data['name'],
+            "title": data['title'],
+            "image_dir": data['image_dir'],
+            "effect": data['effect'],
+            "capacity": data['capacity'],
+            "validity": data['validity']
+          }
+
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully Edit My Medicines.',
+            'results': results
+            }
+          return response_object, 200
+
+    except Exception as e:
+      print(e)
+      db.session.rollback()
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 401
+
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500

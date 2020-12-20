@@ -2,10 +2,24 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import UserDto
 import requests
-from ..service.users import post_login, social_signin, post_signup, get_find_id
+from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw
 from ..config import kakao_client_id
 
 api = UserDto.api
+
+@api.route('/id')
+class GetFindUser(Resource):
+  def get(self):
+    """Get User Id and Send temporary password"""
+    data = request.args.to_dict()
+    return get_find_user(data)
+
+@api.route('/password')
+class EditPassword(Resource):
+  def patch(self):
+    """Edit temporary password"""
+    data = request.get_json().get('users')
+    return edit_temp_pw(data)
 
 @api.route('/email')
 class GetFindID(Resource):

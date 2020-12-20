@@ -1,13 +1,31 @@
+from app.main import db, create_app
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
-import json ,io
+import json ,io, jwt, os
 from sqlalchemy.sql import text
-import jwt
-import flask_bcrypt
 from sqlalchemy import and_ 
 from app.main import db
 from app.main.model.users import Users
-from ..config import jwt_key, jwt_alg , DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
+from ..config import jwt_key, jwt_alg, MAIL_SENDER, MAIL_SENDER_PASSWORD
+from string import punctuation, ascii_letters, digits
+import random
+from flask_mail import Message, Mail
+import flask_bcrypt
+
+app = create_app('dev') #배포시에는 prod
+
+app.config.update(dict(
+    DEBUG = True,
+    MAIL_SUPPRESS_SEND = False,
+    MAIL_SERVER = 'smtp.googlemail.com',
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USE_SSL = False,
+    MAIL_USERNAME = MAIL_SENDER,
+    MAIL_PASSWORD = MAIL_SENDER_PASSWORD,
+))
+
+mail = Mail(app)
 
 
 def post_signup(data):
@@ -53,6 +71,57 @@ def post_signup(data):
       return response_object, 500
 
 
+def send_password(send, receive, data):
+    print(send, receive, data)
+    try:
+        msg = Message('약올림 임시 비밀번호입니다.', sender = send, recipients = [receive])
+        msg.body = data
+        msg.html = f'<p>{receive} 계정에 임시 변경된 비밀번호는 <strong>{data}<strong>입니다.<br>해당 비밀번호로 로그인 후 개인정보수정에 가셔서 비밀번호를 변경해주세요.</p>'
+        mail.send(msg)
+        return 'Sent'
+    except Exception as e:
+        print(e)
+    finally:
+        pass
+
+def get_find_user(data):
+  """Get Find User API"""
+  try:
+    try:
+      email = data['email']
+
+      user = Users.query.filter_by(email=email).first()
+      print(user)
+      if user:
+        #임시비밀번호 발행   
+        symbols = ascii_letters + digits + punctuation
+        secure_random = random.SystemRandom()
+        password = "".join(secure_random.choice(symbols) for i in range(10))
+        print(password)
+        send_password(MAIL_SENDER, email, password)
+
+        result = {'id' : user.id, "password": password}
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully post login.',
+          'results': result
+        }
+        return response_object, 200
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+         'message': 'Unvaild Info. Try to Sign up or Social Login',
+      }
+      return response_object, 400
+   except Exception as e:
+     response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+      
 def get_find_id(data):
   """Get Find ID API"""
   try:
@@ -92,13 +161,44 @@ def get_find_id(data):
         'message': 'Unvaild Info. Try to Sign up or Social Login.',
       }
       return response_object, 404
+   except Exception as e:
+     response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
-  except Exception as e:
+def edit_temp_pw(data):
+  """Get Find User API"""
+  try:
+    try:
+      user_id = data['id']
+      temp_pw = data['password']
+      temp_pw_hash = flask_bcrypt.generate_password_hash(temp_pw)
+
+      pw_changed = Users.query.filter_by(id =user_id).update({'password': temp_pw_hash})
+      db.session.commit()
+
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully changed to temporary password.',
+      }
+      return response_object, 200
+    except Exception as e:
+      print(e)
+      db.session.rollback()
+      response_object = {
+        'status': 'fail',
+        'message': 'fail to change password.',
+      }
+      return response_object, 400
+   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500  
+
 
 def post_login(data):
   """Post Login"""
@@ -142,7 +242,7 @@ def post_login(data):
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
-      return response_object, 500 
+      return response_object, 500
 
 def social_signin(data):
     #print("profile_json:", data)

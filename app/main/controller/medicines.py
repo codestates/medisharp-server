@@ -108,7 +108,7 @@ class Medicine(Resource):
 
   def delete(self):
     """Delete User Medicine API"""
-    data = request.get_json().get('medicine')
+    data = request.args.to_dict()
     return delete_my_medicines(data)
 
 @api.route('/upload')

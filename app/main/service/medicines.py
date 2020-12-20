@@ -388,7 +388,6 @@ def get_my_medicines_info(data):
 def delete_my_medicines(data):
   """ Delete my medicines API """
   try:
-    medicine_name = data['name']
     medicine_id = data['id']
     try:
       token = request.headers.get('Authorization')
@@ -398,12 +397,12 @@ def delete_my_medicines(data):
         engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI) #배포때는 여기를 ProductionConfig.SQLALCHEMY_DATABASE_URI 로 해주어야 합니다. 
         delete_schedules_medicines_query = text("""DELETE FROM schedules_medicines WHERE medicines_id =  :medicine_id""")
         delete_users_medicines_query = text("""DELETE FROM users_medicines WHERE medicines_id =  :medicine_id""")
-        delete_medicine = text("""DELETE FROM medicines WHERE id = :medicine_id AND name = :medicine_name""")
+        delete_medicine = text("""DELETE FROM medicines WHERE id = :medicine_id""")
         with engine.connect() as con:
           result = con.execute(delete_schedules_medicines_query, {'medicine_id': medicine_id})
           result2 = con.execute(delete_users_medicines_query,{'medicine_id': medicine_id} )
-          result3 = con.execute(delete_medicine,{'medicine_id': medicine_id, 'medicine_name': medicine_name} )
-
+          result3 = con.execute(delete_medicine,{'medicine_id': medicine_id} )
+          
         response_object = {
             'status': 'OK',
             'message': 'Successfully delete this medicines.',
@@ -421,13 +420,4 @@ def delete_my_medicines(data):
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
     }
-    return response_object, 500 
-
-
-
-
-
-
-
-
-
+    return response_object, 500

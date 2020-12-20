@@ -49,6 +49,7 @@ def post_schedules_common(data):
     except Exception as e:  
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -114,6 +115,7 @@ def edit_schedules_common(data):
     except Exception as e:  
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -189,6 +191,7 @@ def post_schedules_date(data):
     except Exception as e:
         print(e)
         db.session.rollback()
+        raise
         response_object = {
           'status': 'fail',
           'message': 'Provide a valid auth token.',
@@ -268,6 +271,7 @@ def edit_schedules_date(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -323,6 +327,7 @@ def get_schedules_common(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -366,6 +371,7 @@ def delete_all_schedules(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -408,6 +414,7 @@ def delete_clicked_schedules(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

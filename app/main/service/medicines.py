@@ -109,6 +109,7 @@ def post_medicine(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -154,6 +155,7 @@ def post_schedules_common_medicines(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -252,6 +254,7 @@ def get_schedules_common_medicines(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -301,6 +304,7 @@ def post_users_medicines(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -344,6 +348,7 @@ def get_my_medicines():
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -401,6 +406,7 @@ def get_my_medicines_info(data):
           return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

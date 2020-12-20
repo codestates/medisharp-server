@@ -58,6 +58,7 @@ def post_signup(data):
         return response_object, 200
     except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',
@@ -113,6 +114,7 @@ def get_find_user(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -147,14 +149,18 @@ def get_email_check(data):
         'status': 'fail',
         'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
         }
-        return response_object, 400
+        return response_object, 201
     except Exception as e:
+      db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
         'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
       }
       return response_object, 400
+    finally:
+      db.session.close()
 
   except Exception as e:
     response_object = {
@@ -194,9 +200,10 @@ def get_find_id(data):
         'status': 'fail',
         'message': 'Unvaild Info. Try to Sign up or Social Login',
         }
-        return response_object, 404
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -231,6 +238,7 @@ def edit_temp_pw(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'fail to change password.',
@@ -269,15 +277,16 @@ def post_login(data):
           'status': 'fail',
           'message': 'Unvalid user password.',
           }
-          return response_object, 401
+          return response_object, 201
       else:
         response_object = {
           'status': 'fail',
           'message': 'Unvalid user email.',
         }
-        return response_object, 401
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -340,6 +349,7 @@ def social_signin(data):
           return response_object, 201
       except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',

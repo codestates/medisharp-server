@@ -32,22 +32,27 @@ def edit_user_info(data):
   try:  
     try:
       token = request.headers.get('Authorization')
-
       decoded_token = jwt.decode(token, jwt_key, jwt_alg)
       user_id = decoded_token['id']
       if decoded_token:
         mobile = data['mobile']
+        full_name = data['full_name']
         password = data['password']
         pw_hash = flask_bcrypt.generate_password_hash(password)
         mobile_hash = flask_bcrypt.generate_password_hash(mobile)     
 
-        edited_info = db.session.query(Users).filter_by(id = user_id).update(data)
+        edited_info = Users.query.filter_by(id = user_id).update({'mobile': mobile_hash, 'full_name': full_name, 'password': pw_hash})
         db.session.commit()
-        print('edit:', edited_info)
+
+        edit_user = {
+          'mobile' : mobile,
+          'full_name' : full_name,
+        }
+        print('edit:', edit_user)
         response_object = {
           'status': 'OK',
           'message': 'Successfully changed to personal data.',
-          'results': edited_info
+          'results': edit_user
         }
         return response_object, 200
     except Exception as e:

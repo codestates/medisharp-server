@@ -27,6 +27,46 @@ app.config.update(dict(
 
 mail = Mail(app)
 
+def edit_user_info(data):
+  """Edit User Info API"""
+  try:  
+    try:
+      token = request.headers.get('Authorization')
+
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+      if decoded_token:
+        mobile = data['mobile']
+        password = data['password']
+        pw_hash = flask_bcrypt.generate_password_hash(password)
+        mobile_hash = flask_bcrypt.generate_password_hash(mobile)     
+
+        edited_info = db.session.query(Users).filter_by(id = user_id).update(data)
+        db.session.commit()
+        print('edit:', edited_info)
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully changed to personal data.',
+          'results': edited_info
+        }
+        return response_object, 200
+    except Exception as e:
+      print(e)
+      db.session.rollback()
+      raise
+      response_object = {
+        'status': 'fail',
+        'message': 'fail to change your data.',
+      }
+      return response_object, 400
+    finally:
+      db.session.close()
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500  
 
 def post_signup(data):
   """Post Login"""

@@ -64,11 +64,15 @@ def get_monthly_checked(data):
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+      db.session.close()
   except Exception as e:
     print(e)
     response_object = {
@@ -117,12 +121,16 @@ def get_alarms_list(data):
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
-      }
+        }
       return response_object, 401
+    finally:
+      db.session.close()
   except Exception as e:
     response_object = {
       'status': 'Internal Server Error',
@@ -159,12 +167,15 @@ def get_today_checked(data):
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
-
+    finally:
+      db.session.close()
   except Exception as e:
     response_object = {
       'status': 'Internal Server Error',
@@ -173,17 +184,6 @@ def get_today_checked(data):
     return response_object, 500
 
 
-
-"""
-client에서 
-{
-  "schedules_common": 
-    {"schedules_common_id": 1, 
-      "clickdate": '2020-12-12',
-    }
-}
-의 형태로 보내준다고 생각하고 구현
-"""
 def patch_check(data):
   """ Convert check False to True or True to False"""
   try:
@@ -210,11 +210,14 @@ def patch_check(data):
     except Exception as e:  
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+      db.session.close()
   
   except Exception as e:
       response_object = {

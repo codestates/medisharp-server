@@ -128,7 +128,7 @@ def get_alarms_list(data):
         'status': 'fail',
         'message': 'Provide a valid auth token.',
         }
-        return response_object, 401
+      return response_object, 401
     finally:
       db.session.close()
   except Exception as e:
@@ -176,7 +176,7 @@ def get_today_checked(data):
       return response_object, 401
     finally:
       db.session.close()
-except Exception as e:
+  except Exception as e:
     response_object = {
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',

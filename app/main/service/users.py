@@ -129,6 +129,45 @@ def get_find_user(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
+def get_email_check(data):
+  """get Email Check API"""
+  try:
+    try:
+      email = data['email']
+      search = db.session.query(Users).filter_by(email = email).first()
+      print(search)
+
+      if search is None:  
+        response_object = {
+          'status': 'OK',
+          'message': '사용 가능한 이메일입니다.',
+        }
+        return response_object, 200
+      else:
+        response_object = {
+        'status': 'fail',
+        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+        }
+        return response_object, 201
+    except Exception as e:
+      db.session.rollback()
+      raise
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+      }
+      return response_object, 400
+    finally:
+      db.session.close()
+
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
       
 def get_find_id(data):
   """Get Find ID API"""
@@ -161,7 +200,7 @@ def get_find_id(data):
         'status': 'fail',
         'message': 'Unvaild Info. Try to Sign up or Social Login',
         }
-        return response_object, 404
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
       raise
@@ -238,13 +277,13 @@ def post_login(data):
           'status': 'fail',
           'message': 'Unvalid user password.',
           }
-          return response_object, 401
+          return response_object, 201
       else:
         response_object = {
           'status': 'fail',
           'message': 'Unvalid user email.',
         }
-        return response_object, 401
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
       raise

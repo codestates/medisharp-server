@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import UserDto
 import requests
-from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw
+from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw, get_find_user, get_email_check
 from ..config import kakao_client_id
 
 api = UserDto.api
@@ -26,7 +26,10 @@ class GetFindID(Resource):
   def get(self):
     """Get Find ID"""
     data = request.args.to_dict()
-    return get_find_id(data)
+    if 'email' in data.keys():
+        return get_email_check(data)
+    else:
+        return get_find_id(data)
 
 @api.route('/signup')
 class PostSignup(Resource):

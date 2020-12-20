@@ -1,12 +1,56 @@
-from flask import request, jsonify
+from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
-from sqlalchemy import and_ 
-import json
+from sqlalchemy import and_ , create_engine
+import json ,io
+from sqlalchemy.sql import text
 import jwt
-import flask_bcrypt
+import bcrypt
 from app.main import db
 from app.main.model.users import Users
-from ..config import jwt_key, jwt_alg 
+from ..config import jwt_key, jwt_alg , DevelopmentConfig #배포때는 여기를 ProductionConfig로 해주어야 합니다. 
+
+
+def post_signup(data):
+  """Post Login"""
+  try:
+    try:
+      full_name = data['full_name']
+      email = data['email']
+      password = data['password']  
+      mobile = data['mobile']
+      login = 'basic'
+
+      user = Users.query.filter_by(email=data['email']).first()
+
+      if user == None:
+        new_user = Users(
+          full_name = data['full_name'],
+          email = data['email'],
+          password = data['password'], 
+          mobile = data['mobile'],
+          login = 'basic'
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Post Signup.',
+        }
+        return response_object, 200
+      except Exception as e:
+        print(e)
+        response_object = {
+          'status': 'fail',
+          'message': 'Already a Registered User.',
+        }
+        return response_object, 409
+     except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 
 def post_login(data):
@@ -47,14 +91,12 @@ def post_login(data):
         'message': 'Unvalid User.',
       }
       return response_object, 401
-
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500 
-
 
 def social_signin(data):
     #print("profile_json:", data)

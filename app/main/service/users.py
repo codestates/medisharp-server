@@ -1,9 +1,11 @@
-from flask import request, redirect
-import jwt, os
-
 from app.main import db, create_app
+from flask import request, jsonify, redirect
+from flask_restx import Resource, fields, marshal
+import json ,io, jwt, os
+from sqlalchemy.sql import text
+from sqlalchemy import and_ 
+from app.main import db
 from app.main.model.users import Users
-
 from ..config import jwt_key, jwt_alg, MAIL_SENDER, MAIL_SENDER_PASSWORD
 from string import punctuation, ascii_letters, digits
 import random
@@ -24,6 +26,50 @@ app.config.update(dict(
 ))
 
 mail = Mail(app)
+
+
+def post_signup(data):
+  """Post Login"""
+  try:
+    try:
+      full_name = data['full_name']
+      email = data['email']
+      password = data['password']  
+      mobile = data['mobile']
+      login = 'basic'
+
+      user = Users.query.filter_by(email=data['email']).first()
+
+      if user == None:
+        new_user = Users(
+          full_name = data['full_name'],
+          email = data['email'],
+          password = data['password'], 
+          mobile = data['mobile'],
+          login = 'basic'
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Post Signup.',
+        }
+        return response_object, 200
+      except Exception as e:
+        print(e)
+        response_object = {
+          'status': 'fail',
+          'message': 'Already a Registered User.',
+        }
+        return response_object, 409
+     except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+
 
 def send_password(send, receive, data):
     print(send, receive, data)
@@ -66,12 +112,57 @@ def get_find_user(data):
       print(e)
       response_object = {
         'status': 'fail',
-        'message': '일치하는 회원 정보가 없습니다.',
+         'message': 'Unvaild Info. Try to Sign up or Social Login',
       }
       return response_object, 400
+   except Exception as e:
+     response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
+      
+def get_find_id(data):
+  """Get Find ID API"""
+  try:
+    print(data)
+    try:
+      full_name = data['full_name']
+      mobile = data['mobile']
+      mobile_db = db.session.query(Users.mobile).filter(and_(Users.full_name==full_name, Users.login=='basic')).all()
+      print(mobile_db)
+      #print(flask_bcrypt.check_password_hash(mobile_db[0], mobile))
 
-  except Exception as e:
+      result = None
+
+      for el in mobile_db:
+        if flask_bcrypt.check_password_hash(el[0], mobile):
+          email = db.session.query(Users.email).filter(and_(Users.full_name==full_name, Users.mobile==el[0],Users.login=='basic')).first() 
+          print(email)
+          result = email
+
+      if result:    
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully Get Find ID.',
+          'email': result
+        }
+        return response_object, 200
+      else:
+        response_object = {
+        'status': 'fail',
+        'message': 'Unvaild Info. Try to Sign up or Social Login',
+        }
+        return response_object, 404
+    except Exception as e:
+      print(e)
       response_object = {
+        'status': 'fail',
+        'message': 'Unvaild Info. Try to Sign up or Social Login.',
+      }
+      return response_object, 404
+   except Exception as e:
+     response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
@@ -101,7 +192,51 @@ def edit_temp_pw(data):
         'message': 'fail to change password.',
       }
       return response_object, 400
+   except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500  
 
+
+def post_login(data):
+  """Post Login"""
+  try:
+    try:
+      email = data['email']
+      password = data['password'] 
+      user = Users.query.filter_by(email=email).first()
+      if user:
+        if flask_bcrypt.check_password_hash(user.password, password):
+          token = jwt.encode({"id": user.id}, jwt_key, jwt_alg) 
+          token = token.decode("utf-8")     
+
+          response_object = {
+            'status': 'OK',
+            'message': 'Successfully post login.',
+            'Authorization': token
+          }
+          return response_object, 200
+        else:
+          response_object = {
+          'status': 'fail',
+          'message': 'Unvalid user password.',
+          }
+          return response_object, 401
+      else:
+        response_object = {
+          'status': 'fail',
+          'message': 'Unvalid user email.',
+        }
+        return response_object, 401
+    except Exception as e:
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Unvalid User.',
+      }
+      return response_object, 401
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
@@ -167,5 +302,6 @@ def social_signin(data):
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
-      return response_object, 500
+      return response_object, 500 
+
 

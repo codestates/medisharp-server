@@ -54,6 +54,8 @@ def post_schedules_common(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       response_object = {
@@ -117,6 +119,8 @@ def edit_schedules_common(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       response_object = {
@@ -190,6 +194,8 @@ def post_schedules_date(data):
           'message': 'Provide a valid auth token.',
         }
         return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       response_object = {
@@ -267,6 +273,8 @@ def edit_schedules_date(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       response_object = {
@@ -314,19 +322,22 @@ def get_schedules_common(data):
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
       print(e)
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+      db.session.close()
 
   except Exception as e:
-      response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
-      }
-      return response_object, 500
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
 
 def delete_all_schedules(data):
   """ Post Schedules Date API"""
@@ -360,6 +371,8 @@ def delete_all_schedules(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+      db.session.close()
 
   except Exception as e:
       response_object = {
@@ -400,6 +413,9 @@ def delete_clicked_schedules(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+      
+    finally:
+      db.session.close()
 
   except Exception as e:
       response_object = {

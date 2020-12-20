@@ -56,14 +56,17 @@ def post_signup(data):
           'message': 'Successfully Post Signup.',
         }
         return response_object, 200
-      except Exception as e:
+    except Exception as e:
+        db.session.rollback()
         print(e)
         response_object = {
           'status': 'fail',
           'message': 'Already a Registered User.',
         }
         return response_object, 409
-     except Exception as e:
+    finally:
+        db.session.close()
+  except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
@@ -109,14 +112,17 @@ def get_find_user(data):
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
       print(e)
       response_object = {
         'status': 'fail',
-         'message': 'Unvaild Info. Try to Sign up or Social Login',
+        'message': 'Unvaild Info. Try to Sign up or Social Login',
       }
       return response_object, 400
-   except Exception as e:
-     response_object = {
+    finally:
+      db.session.close()
+  except Exception as e:
+      response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
@@ -155,14 +161,17 @@ def get_find_id(data):
         }
         return response_object, 404
     except Exception as e:
+      db.session.rollback()
       print(e)
       response_object = {
         'status': 'fail',
         'message': 'Unvaild Info. Try to Sign up or Social Login.',
       }
       return response_object, 404
-   except Exception as e:
-     response_object = {
+    finally:
+      db.session.close()
+  except Exception as e:
+      response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
       }
@@ -192,7 +201,9 @@ def edit_temp_pw(data):
         'message': 'fail to change password.',
       }
       return response_object, 400
-   except Exception as e:
+    finally:
+      db.session.close()
+  except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
         'message': 'Some Internal Server Error occurred.',
@@ -231,12 +242,15 @@ def post_login(data):
         }
         return response_object, 401
     except Exception as e:
+      db.session.rollback()
       print(e)
       response_object = {
         'status': 'fail',
         'message': 'Unvalid User.',
       }
       return response_object, 401
+    finally:
+      db.session.close()
   except Exception as e:
       response_object = {
         'status': 'Internal Server Error',
@@ -297,6 +311,8 @@ def social_signin(data):
           'message': 'Provide a valid auth token.',
         }
         return response_object, 401
+      finally:
+        db.session.close()
     except Exception as e:
       response_object = {
         'status': 'Internal Server Error',

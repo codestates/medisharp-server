@@ -114,6 +114,8 @@ def post_medicine(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
       
   except Exception as e:
       response_object = {
@@ -157,6 +159,8 @@ def post_schedules_common_medicines(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       print(e)
@@ -253,6 +257,8 @@ def get_schedules_common_medicines(data):
         'message': 'Provide a valid auth token.',
         }
       return response_object, 401
+    finally:
+        db.session.close()
       
   except Exception as e:
       response_object = {
@@ -300,6 +306,8 @@ def post_users_medicines(data):
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       print(e)
@@ -335,11 +343,14 @@ def get_my_medicines():
         }
         return response_object, 200
     except Exception as e:
+      db.session.rollback()
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
 
   except Exception as e:
       response_object = {
@@ -389,11 +400,14 @@ def get_my_medicines_info(data):
           }
           return response_object, 200
     except Exception as e:
+      db.session.rollback()
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
       }
       return response_object, 401
+    finally:
+        db.session.close()
   except Exception as e:
     response_object = {
       'status': 'Internal Server Error',

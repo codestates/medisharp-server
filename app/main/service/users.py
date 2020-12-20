@@ -58,6 +58,7 @@ def post_signup(data):
         return response_object, 200
     except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',
@@ -113,6 +114,7 @@ def get_find_user(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -162,6 +164,7 @@ def get_find_id(data):
         return response_object, 404
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -196,6 +199,7 @@ def edit_temp_pw(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'fail to change password.',
@@ -243,6 +247,7 @@ def post_login(data):
         return response_object, 401
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -305,6 +310,7 @@ def social_signin(data):
           return response_object, 201
       except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',

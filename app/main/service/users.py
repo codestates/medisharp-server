@@ -364,7 +364,7 @@ def social_signin(data):
       }
       return response_object, 500 
 
-def get_user_info(data):
+def get_user_info():
   """Get User Info"""
   try:
     try:

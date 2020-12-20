@@ -49,7 +49,6 @@ class PostLogin(Resource):
 class GetUserInfo(Resource):
   def get(self):
     """Get User Info for MyPage"""
-    # data = request.args.to_dict()
     return get_user_info()
 
 

@@ -1,17 +1,19 @@
-#데이터를 http로 처리할 controller를 만들어 주겠습니다. 그러면서 util 폴더와 한번 소통합니다. 
-#이는 해당 api 가 어느 DB와 소통하는지 한번 점검 해주는 느낌이라고 보시면 될거 같아요!
-#여기선 실제로 DB에서 데이터를 주고받는 과정 직전까지의 코드를 짜줍니다
-
-
 from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
-
 from ..util.dto import UserDto
 import requests
-from ..service.users import social_signin
+from ..service.users import post_login, social_signin
 from ..config import kakao_client_id
 
 api = UserDto.api
+
+@api.route('/login')
+class PostLogin(Resource):
+  def post(self):
+    """Post Login"""
+    data = request.get_json().get('users')
+    return post_login(data)
+
 
 @api.route("/oauth/kakao") 
 class KakaoSignIn(Resource):
@@ -58,3 +60,4 @@ class KakaoSignInCallback(Resource):
             return make_response({"message" : "INVALID_TOKEN"}, 400)
           
         return social_signin(data=data) # 이젠 위에서 받은 데이터를 DB에 넣어줘야 합니다. 이 과정이 service에서 진행됩니다.
+

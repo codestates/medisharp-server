@@ -56,19 +56,19 @@ def post_signup(data):
           'message': 'Successfully Post Signup.',
         }
         return response_object, 200
-      except Exception as e:
-        print(e)
-        response_object = {
-          'status': 'fail',
-          'message': 'Already a Registered User.',
-        }
-        return response_object, 409
-     except Exception as e:
+    except Exception as e:
+      print(e)
       response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
+        'status': 'fail',
+        'message': 'Already a Registered User.',
       }
-      return response_object, 500
+      return response_object, 409
+  except Exception as e:
+   response_object = {
+     'status': 'Internal Server Error',
+     'message': 'Some Internal Server Error occurred.',
+   }
+   return response_object, 500
 
 
 def send_password(send, receive, data):
@@ -115,12 +115,12 @@ def get_find_user(data):
          'message': 'Unvaild Info. Try to Sign up or Social Login',
       }
       return response_object, 400
-   except Exception as e:
-     response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
-      }
-      return response_object, 500
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
       
 def get_find_id(data):
   """Get Find ID API"""
@@ -161,12 +161,12 @@ def get_find_id(data):
         'message': 'Unvaild Info. Try to Sign up or Social Login.',
       }
       return response_object, 404
-   except Exception as e:
-     response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
-      }
-      return response_object, 500
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
 
 def edit_temp_pw(data):
   """Get Find User API"""
@@ -192,12 +192,50 @@ def edit_temp_pw(data):
         'message': 'fail to change password.',
       }
       return response_object, 400
-   except Exception as e:
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500  
+
+
+def edit_user_info(data):
+  """Edit User Info API"""
+  try:
+    user_id = data['id']
+    mobile = data['mobile']
+    password = data['password']
+    pw_hash = flask_bcrypt.generate_password_hash(password)
+    mobile_hash = flask_bcrypt.generate_password_hash(mobile)    
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']      
+      if decoded_token:
+        edited_info = db.session.query(Users).filter_by(id = user_id).update(data)
+        db.session.commit()
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully changed to personal data.',
+          'results': edited_info
+        }
+        return response_object, 200
+    except Exception as e:
+      print(e)
+      db.session.rollback()
       response_object = {
-        'status': 'Internal Server Error',
-        'message': 'Some Internal Server Error occurred.',
+        'status': 'fail',
+        'message': 'fail to change your data.',
       }
-      return response_object, 500  
+      return response_object, 400
+  except Exception as e:
+    response_object = {
+     'status': 'Internal Server Error',
+     'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500  
 
 
 def post_login(data):

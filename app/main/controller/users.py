@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import UserDto
 import requests
-from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw
+from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw, edit_user_info
 from ..config import kakao_client_id
 
 api = UserDto.api
@@ -20,6 +20,13 @@ class EditPassword(Resource):
     """Edit temporary password"""
     data = request.get_json().get('users')
     return edit_temp_pw(data)
+
+@api.route('/edit')
+class EditUserInfo(Resource):
+  def patch(self):
+    """Edit user info"""
+    data = request.get_json().get('users')
+    return edit_user_info(data)
 
 @api.route('/email')
 class GetFindID(Resource):

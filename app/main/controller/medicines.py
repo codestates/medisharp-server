@@ -2,13 +2,15 @@ import flask
 from flask import request, redirect, jsonify, make_response, render_template
 from flask_restx import Resource
 from werkzeug.utils import secure_filename
-import tensorflow
+import tensorflow as tf
 from keras.models import load_model
 from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info
+
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info, delete_my_medicines, edit_my_medicines
+
 import numpy as np
 # import cv2
 import os
@@ -21,18 +23,29 @@ from ..util.dto import MedicineDto
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 from cnn.class_list import get_class_list
 
+interpreter = None
+
+#Load TFLite model and allocate tensors.
+def load_model():
+  global interpreter
+  currdir = os.getcwd()
+  print("currdir: ", currdir)
+  modeldir = os.path.join(currdir+"/cnn/model/medisharp_tflite_model.tflite")
+  interpreter = tf.lite.Interpreter(model_path=modeldir)
+
+print(("* Loading Keras model and Flask starting server..."
+		"please wait until server has fully started"))
+load_model()
+
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
 
 def prepare_image(image, target):
 	if image.mode != "RGB":
 		image = image.convert("RGB")
-
 	image = image.resize(target)
 	image = img_to_array(image)
 	image = np.expand_dims(image, axis=0)
-	image = imagenet_utils.preprocess_input(image)
-
 	return image
 
 @api.route('/image')
@@ -60,23 +73,32 @@ class PredictMedicineName(Resource):
               }
             return response_object, 400
           elif file and file.filename:
+            interpreter.allocate_tensors()
+            #Get input and output tensors.
+            input_details = interpreter.get_input_details()
+            output_details = interpreter.get_output_details()
+            #Ready for the Data
             image = flask.request.files["image"].read()
             image = Image.open(io.BytesIO(image))
             image = prepare_image(image, target=(224, 224))
-            currdir = os.getcwd()
-            modeldir = os.path.join(currdir+ "/cnn/Pill_image_pretrained_mobile_model_2.h5")
-            model = load_model(modeldir)
-            preds = model.predict(image)
-            pred_class = np.argmax(preds, axis=-1)
+            #input
+            interpreter.set_tensor(input_details[0]['index'], image)
+            interpreter.invoke()
+            #output
+            output_data = interpreter.get_tensor(output_details[0]['index'])
+            
+            pred_class = np.argmax(output_data, axis=-1)
             prediction_result = class_list[int(pred_class)]
             print("prediction: ", class_list[int(pred_class)])
+            
             response_object = {
               'status': 'OK',
               'message': 'Successfully predict image class.',
               'prediction': prediction_result
             }
             return response_object, 200
-      except Exception as e:  
+      except Exception as e: 
+        print("401 error: ", e) 
         response_object = {
           'status': 'fail',
           'message': 'Provide a valid auth token.',
@@ -105,6 +127,17 @@ class Medicine(Resource):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
+
+  def patch(self):
+    """Edit My Medicine API"""
+    data = request.get_json().get('medicine') 
+    return edit_my_medicines(data)
+
+  def delete(self):
+    """Delete User Medicine API"""
+    data = request.args.to_dict()
+    return delete_my_medicines(data)
+
 
 @api.route('/upload')
 class UploadMedicine(Resource):

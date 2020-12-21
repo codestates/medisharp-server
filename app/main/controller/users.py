@@ -2,7 +2,7 @@ from flask import request, redirect, jsonify, make_response
 from flask_restx import Resource
 from ..util.dto import UserDto
 import requests
-from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw, get_find_user, get_email_check
+from ..service.users import post_login, social_signin, post_signup, get_find_id, edit_temp_pw, get_find_user, get_email_check, get_user_info
 from ..config import kakao_client_id
 
 api = UserDto.api
@@ -44,6 +44,12 @@ class PostLogin(Resource):
     """Post Login"""
     data = request.get_json().get('users')
     return post_login(data)
+
+@api.route('')
+class GetUserInfo(Resource):
+  def get(self):
+    """Get User Info for MyPage"""
+    return get_user_info()
 
 
 @api.route("/oauth/kakao") 

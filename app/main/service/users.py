@@ -103,6 +103,7 @@ def post_signup(data):
         return response_object, 200
     except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',
@@ -158,6 +159,7 @@ def get_find_user(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -172,6 +174,45 @@ def get_find_user(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+
+def get_email_check(data):
+  """get Email Check API"""
+  try:
+    try:
+      email = data['email']
+      search = db.session.query(Users).filter_by(email = email).first()
+      print(search)
+
+      if search is None:  
+        response_object = {
+          'status': 'OK',
+          'message': '사용 가능한 이메일입니다.',
+        }
+        return response_object, 200
+      else:
+        response_object = {
+        'status': 'fail',
+        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+        }
+        return response_object, 201
+    except Exception as e:
+      db.session.rollback()
+      raise
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+      }
+      return response_object, 400
+    finally:
+      db.session.close()
+
+  except Exception as e:
+    response_object = {
+      'status': 'Internal Server Error',
+      'message': 'Some Internal Server Error occurred.',
+    }
+    return response_object, 500
       
 def get_find_id(data):
   """Get Find ID API"""
@@ -204,9 +245,10 @@ def get_find_id(data):
         'status': 'fail',
         'message': 'Unvaild Info. Try to Sign up or Social Login',
         }
-        return response_object, 404
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -241,6 +283,7 @@ def edit_temp_pw(data):
     except Exception as e:
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'fail to change password.',
@@ -254,7 +297,6 @@ def edit_temp_pw(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500  
-
 
 def post_login(data):
   """Post Login"""
@@ -279,15 +321,16 @@ def post_login(data):
           'status': 'fail',
           'message': 'Unvalid user password.',
           }
-          return response_object, 401
+          return response_object, 201
       else:
         response_object = {
           'status': 'fail',
           'message': 'Unvalid user email.',
         }
-        return response_object, 401
+        return response_object, 201
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -350,6 +393,7 @@ def social_signin(data):
           return response_object, 201
       except Exception as e:
         db.session.rollback()
+        raise
         print(e)
         response_object = {
           'status': 'fail',
@@ -364,5 +408,40 @@ def social_signin(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500 
+
+def get_user_info():
+  """Get User Info"""
+  try:
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+
+      user_info = Users.query.filter_by(id=user_id).first()
+      result = {'email' : user_info.email, "full_name": user_info.full_name}
+
+      response_object = {
+        'status': 'OK',
+        'message': 'Successfully get user information.',
+        'results': result
+      }
+      return response_object, 200
+    except Exception as e:
+      db.session.rollback()
+      raise
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Provide a valid auth token.',
+      }
+      return response_object, 400
+    finally:
+      db.session.close()
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 

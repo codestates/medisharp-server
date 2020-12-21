@@ -65,6 +65,7 @@ def get_monthly_checked(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -121,6 +122,7 @@ def get_alarms_list(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       print(e)
       response_object = {
         'status': 'fail',
@@ -166,6 +168,7 @@ def get_today_checked(data):
         return response_object, 200
     except Exception as e:
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',
@@ -207,6 +210,7 @@ def patch_check(data):
     except Exception as e:  
       print(e)
       db.session.rollback()
+      raise
       response_object = {
         'status': 'fail',
         'message': 'Provide a valid auth token.',

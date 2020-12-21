@@ -8,13 +8,16 @@ from keras.applications import ResNet50, imagenet_utils
 from keras.preprocessing.image import img_to_array
 from PIL import Image
 import requests
-from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info
+
+from ..service.medicines import post_medicine, post_schedules_common_medicines, upload_medicine , get_schedules_common_medicines, post_users_medicines, get_my_medicines, get_my_medicines_info, delete_my_medicines, edit_my_medicines
+
 import numpy as np
 # import cv2
 import os
 import sys
 import io
 import jwt
+
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
@@ -124,6 +127,17 @@ class Medicine(Resource):
     """Post Medicine API"""
     data = request.get_json().get('medicine') 
     return post_medicine(data)
+
+  def patch(self):
+    """Edit My Medicine API"""
+    data = request.get_json().get('medicine') 
+    return edit_my_medicines(data)
+
+  def delete(self):
+    """Delete User Medicine API"""
+    data = request.args.to_dict()
+    return delete_my_medicines(data)
+
 
 @api.route('/upload')
 class UploadMedicine(Resource):

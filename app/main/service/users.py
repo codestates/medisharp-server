@@ -300,6 +300,41 @@ def post_login(data):
         'message': 'Some Internal Server Error occurred.',
       }
       return response_object, 500
+    
+def post_logout(data):
+  """Post Logout"""
+  try:
+    try:
+      token = request.headers.get('Authorization')
+      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+      user_id = decoded_token['id']
+   
+      if decoded_token:
+        session.clear()    
+        return redirect('/')
+
+        response_object = {
+          'status': 'OK',
+          'message': 'Successfully post logout.',
+        }
+        return response_object, 200
+    except Exception as e:
+      db.session.rollback()
+      raise
+      print(e)
+      response_object = {
+        'status': 'fail',
+        'message': 'Unvalid User.',
+      }
+      return response_object, 401
+    finally:
+      db.session.close()
+  except Exception as e:
+      response_object = {
+        'status': 'Internal Server Error',
+        'message': 'Some Internal Server Error occurred.',
+      }
+      return response_object, 500
 
 def social_signin(data):
     #print("profile_json:", data)
@@ -444,4 +479,4 @@ def edit_user_info(data):
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
     }
-    return response_object, 500  
+    return response_object, 500

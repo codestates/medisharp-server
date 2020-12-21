@@ -18,3 +18,4 @@ api.add_namespace(schedules_common, path='/schedules-commons')
 api.add_namespace(schedules_date, path='/schedules-dates')
 api.add_namespace(medicines, path='/medicines')
 api.add_namespace(users, path="/users") 
+

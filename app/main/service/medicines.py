@@ -242,6 +242,11 @@ def get_schedules_common_medicines(data):
           topic_fields = {
             'name': fields.String(required=True),
             'camera':fields.Boolean(required=True),
+            'image_dir': fields.String(required=True),
+            'title': fields.String(required=True),
+            'effect' : fields.String(required=True),
+            'capacity' : fields.String(required=True),
+            'validity' : fields.String(required=True),
             }
           results = [marshal(topic, topic_fields) for topic in Medicines.query.filter(Medicines.timetotake.any(id=schedules_common_id)).all()]
           print('get medi:',results)

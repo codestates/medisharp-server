@@ -34,11 +34,7 @@ def post_schedules_common(data):
           db.session.commit()
           
           results = {
-            "new_schedules_common_id": new_schedules_common.id,
-            "time": data['time'], 
-            "startdate" : new_schedules_common.startdate,
-            "enddate" : new_schedules_common.enddate,
-            "cycle" : new_schedules_common.cycle
+            "new_schedules_common_id": new_schedules_common.id
           }
           response_object = {
             'status': 'OK',
@@ -91,25 +87,10 @@ def edit_schedules_common(data):
               if not data[key] == saved_schedule[0][key]:
                 schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
                 db.session.commit()
-          
-          # 2. client에서 변경된 데이터만 전달해줄 수 있는 경우
-          # for key in data.keys():
-          #   if not key == "schedules_common_id" and not key == "time":
-          #     schedules_common = Schedules_common.query.filter_by(id =schedules_common_id).update({key: data[key]})
-          #     db.session.commit()
-
-          results = {
-            "time": data['time'],
-            "startdate" : data['startdate'],
-            "enddate" : data['enddate'],
-            "cycle" : data['cycle']
-
-          }
 
           response_object = {
             'status': 'OK',
             'message': 'Successfully Edit Common information of alarm.',
-            'results' : results,
           }
           return response_object, 200
     except Exception as e:  
@@ -176,15 +157,10 @@ def post_schedules_date(data):
             currdate = currdate + datetime.timedelta(days=cycle)
 
           #response는 medicine_id와 schedules_common_id
-          results = {
-            'medicine_id': data['medicines_id'],
-            'schedules_common_id': schedules_common_id
-          }
 
           response_object = {
             'status': 'OK',
             'message': 'Successfully post schedules date.',
-            'results': results
           }
           return response_object, 200
 
@@ -257,14 +233,10 @@ def edit_schedules_date(data):
             #print(currdate_for_cal)
 
           #response는 medicine_id와 schedules_common_id
-          results = {
-            'schedules_common_id': schedules_common_id
-          }
 
           response_object = {
             'status': 'OK',
             'message': 'Successfully post schedules date.',
-            'results': results
             }
           return response_object, 200
 

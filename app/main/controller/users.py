@@ -113,7 +113,7 @@ class KakaoSignInCallback(Resource):
 
         return social_signin(data=data) # 이젠 위에서 받은 데이터를 DB에 넣어줘야 합니다. 이 과정이 service에서 진행됩니다.
 
-@api.route('isloading')
+@api.route('/isloading')
 class FirstLoading(Resource):
     def get(self):
         """Check Server is Ready"""

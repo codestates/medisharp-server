@@ -9,7 +9,8 @@ class Schedules_date(db.Model):
     alarmdate = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
     check = db.Column(db.Boolean, nullable=False)
-  
+    push = db.Column(db.String(100), nullable=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     schedules_common_id = db.Column(db.Integer, db.ForeignKey('schedules_common.id'), nullable=False)
 

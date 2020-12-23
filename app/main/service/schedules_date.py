@@ -99,7 +99,7 @@ def get_alarms_list(data):
         """
         #data = db.session.query(Schedules_date.check, Schedules_date.id, Schedules_date.schedules_common_id, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id, Schedules_common.user_id==user_id)).all() 
         
-        data = db.session.query(Schedules_common.id,Schedules_common.title, Schedules_common.cycle, Schedules_common.memo, Schedules_date.time, Schedules_date.check).join(Schedules_common).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
+        data = db.session.query(Schedules_common.id,Schedules_common.title, Schedules_common.cycle, Schedules_common.memo, Schedules_date.time, Schedules_date.check, Schedules_date.push).join(Schedules_common).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
 
         print(data)
         results = []
@@ -111,6 +111,7 @@ def get_alarms_list(data):
           result['memo'] = el.memo
           result['time'] = datetime.time.strftime(el.time, "%H:%M")
           result['check'] = el.check
+          result['push'] = el.push
           results.append(result)
 
         results = sorting_time(results)

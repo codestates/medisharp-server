@@ -12,7 +12,7 @@ import random
 from flask_mail import Message, Mail
 import flask_bcrypt
 
-app = create_app('dev') #배포시에는 prod
+app = create_app('dev') #배포시에도 dev
 
 app.config.update(dict(
     DEBUG = True,

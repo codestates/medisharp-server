@@ -7,6 +7,7 @@ class Schedules_dateDto:
     'alarmdate': fields.Date(required=True, description='Date with alarm schedule'),
     'time': fields.String(required=True, description='Time(HH:MM:SS) with alarm schedule'),
     'check': fields.Boolean(required=True, description='Whether to take medicine on the day'),
+    'push' : fields.String(required=True, description='Push trigger with alarm schedule'),
   })
 
 class UserDto:

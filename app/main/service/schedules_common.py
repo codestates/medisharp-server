@@ -122,6 +122,7 @@ def post_schedules_date(data):
     enddate=datetime.datetime.strptime(data['enddate'], '%Y-%m-%d')
     cycle=data['cycle']
     time = data['time']
+    push_list = data['pushArr']
     print(data)
 
     try:
@@ -143,18 +144,21 @@ def post_schedules_date(data):
           
           #비교연산자로 기저조건을 걸어주고 주기 계산
           currdate = startdate
+          i = 0
           while currdate <= enddate:
             #이를 schedules_date 테이블에 넣어주기
             new_schedules_date = Schedules_date(
               alarmdate = currdate,
               time = time,
               check = 0,
+              push = push_list[i],
               user_id = user_id,
               schedules_common_id = schedules_common_id
             )
             db.session.add(new_schedules_date)
             db.session.commit()
             currdate = currdate + datetime.timedelta(days=cycle)
+            i = i+1
 
           #response는 medicine_id와 schedules_common_id
 
@@ -184,13 +188,14 @@ def post_schedules_date(data):
       return response_object, 500
 
 def edit_schedules_date(data):
-  """ Post Schedules Date API"""
+  """ Edit Schedules Date API"""
   try:
     cycle = data['cycle']
     schedules_common_id = data['schedules_common_id']
     startdate=datetime.datetime.strptime(data['startdate'], '%Y-%m-%d')
     enddate=datetime.datetime.strptime(data['enddate'], '%Y-%m-%d')
     time = data['time']
+    push_list = data['pushArr']
     try:
         token = request.headers.get('Authorization')
         decoded_token = jwt.decode(token, jwt_key, jwt_alg)
@@ -216,6 +221,7 @@ def edit_schedules_date(data):
           
           #schedule_common에 등록된 startdate로 부터 주기대로 계산하다가 오늘이 넘는 날짜부터 새로 등록하기
           currdate_for_cal = startdate
+          i=0
           while currdate_for_cal <= enddate:
             if currdate_for_cal >= currdate_new:
               print('save:',currdate_for_cal)
@@ -224,12 +230,14 @@ def edit_schedules_date(data):
                 alarmdate = currdate_for_cal,
                 time = time,
                 check = 0,
+                push = push_list[i],
                 user_id = user_id,
                 schedules_common_id = schedules_common_id
               )
               db.session.add(new_schedules_date)
               db.session.commit()
             currdate_for_cal = currdate_for_cal + datetime.timedelta(days=cycle)
+            i = i+1
             #print(currdate_for_cal)
 
           #response는 medicine_id와 schedules_common_id
@@ -279,6 +287,11 @@ def get_schedules_common(data):
         res_date = [marshal(topic, topic_fields) for topic in Schedules_common.query
                                                                         .filter(and_(Schedules_common.id == schedules_common_id,Schedules_common.user_id==user_id))
                                                                         .all()]
+        push_res = db.session.query(Schedules_date.push).filter_by(schedules_common_id =schedules_common_id).all()
+        push_list = []
+        for push in push_res:
+          push_list.append(push[0])
+        print(push_list)
         results = []
         result = {
           'schedules_common_id' : schedules_common_id,
@@ -288,7 +301,8 @@ def get_schedules_common(data):
           'cycle': data['cycle'],
           'memo': data['memo'],
           'time': data['time'],
-          'check': data['check']
+          'check': data['check'],
+          'push_list' : push_list
         }
         results.append(result)
         response_object = {
@@ -310,6 +324,7 @@ def get_schedules_common(data):
       db.session.close()
 
   except Exception as e:
+    print(e)
     response_object = {
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',
@@ -317,7 +332,7 @@ def get_schedules_common(data):
     return response_object, 500
 
 def delete_all_schedules(data):
-  """ Post Schedules Date API"""
+  """ delete_all_schedules API"""
   try:
     schedules_common_id = data['schedules_common_id']
     try:
@@ -373,7 +388,6 @@ def delete_clicked_schedules(data):
 
         if decoded_token:
           results_date = Schedules_date.query.filter(and_(Schedules_date.schedules_common_id==schedules_common_id, Schedules_date.alarmdate==clicked_day)).first() 
-          print(results_date)
           db.session.delete(results_date)
           db.session.commit()
 

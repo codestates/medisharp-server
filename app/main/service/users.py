@@ -29,7 +29,7 @@ mail = Mail(app)
 
 
 def post_signup(data):
-  """Post Login"""
+  """Post Sign up"""
   try:
     try:
       full_name = data['full_name']
@@ -75,7 +75,7 @@ def post_signup(data):
       return response_object, 500
 
 
-def send_password(send, receive, data):
+def send_password(send, receive, data): 
     print(send, receive, data)
     try:
         msg = Message('약올림 임시 비밀번호입니다.', sender = send, recipients = [receive])
@@ -108,7 +108,7 @@ def get_find_user(data):
 
         response_object = {
           'status': 'OK',
-          'message': 'Successfully post login.',
+          'message': 'Success.',
           'results': result
         }
         return response_object, 200
@@ -141,13 +141,13 @@ def get_email_check(data):
       if search is None:  
         response_object = {
           'status': 'OK',
-          'message': '사용 가능한 이메일입니다.',
+          'message': 'You can use this email',
         }
         return response_object, 200
       else:
         response_object = {
         'status': 'fail',
-        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+        'message': 'Already used Info, Try to Find ID or use another Info',
         }
         return response_object, 201
     except Exception as e:
@@ -156,7 +156,7 @@ def get_email_check(data):
       print(e)
       response_object = {
         'status': 'fail',
-        'message': '이미 가입되어있는 이메일입니다. 혹시 비밀번호를 잊으셨나요?',
+        'message': 'Unvalid INFO, Try again',
       }
       return response_object, 400
     finally:
@@ -198,7 +198,7 @@ def get_find_id(data):
       else:
         response_object = {
         'status': 'fail',
-        'message': 'Unvaild Info. Try to Sign up or Social Login',
+        'message': 'Unexpected mobile info',
         }
         return response_object, 201
     except Exception as e:
@@ -220,7 +220,7 @@ def get_find_id(data):
       return response_object, 500
 
 def edit_temp_pw(data):
-  """Get Find User API"""
+  """Edit to temporary password"""
   try:
     try:
       user_id = data['id']
@@ -377,7 +377,7 @@ def social_signin(data):
           #print("token:", token)
           response_object = {
               'status': 'already signin',
-              'message': 'you already our member. login success',
+              'message': 'you become a member for our service',
               'Authorization': token
           }
           return response_object, 201

@@ -3,17 +3,13 @@
 from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
 from sqlalchemy import and_
-import json
-import jwt
-import re
-import datetime
+import json , jwt, re, datetime
 from operator import itemgetter
 from app.main import db
 from app.main.model.schedules_date import Schedules_date
 from app.main.model.schedules_common import Schedules_common
 from app.main.model.users import Users
 from ..config import jwt_key, jwt_alg
-import re
 
 class TimeFormat(fields.Raw):
     def format(self, value):
@@ -86,103 +82,55 @@ def get_alarms_list(data):
   """ Get Alarms List on Clicked date for main page and calendar page"""
   try:
     alarmdate = datetime.datetime.strptime(data['date'], '%Y-%m-%d')
-    try:
-      token = request.headers.get('Authorization')
-      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      user_id = decoded_token['id']
-      if decoded_token:
-        """
-        schedules_date와 schedules_common을 innerjoin하여서 
-        schedules_date에서는 check, time
-        schedules_common에서는 title, cycle, memo
-        데이터를 가져와야한다. 
-        """
-        #data = db.session.query(Schedules_date.check, Schedules_date.id, Schedules_date.schedules_common_id, Schedules_date.time, Schedules_common.title, Schedules_common.cycle, Schedules_common.memo).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id, Schedules_common.user_id==user_id)).all() 
-        
-        data = db.session.query(Schedules_common.id,Schedules_common.title, Schedules_common.cycle, Schedules_common.memo, Schedules_date.time, Schedules_date.check, Schedules_date.push).join(Schedules_common).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
+    if user_id:
+      data = db.session.query(Schedules_common.id,Schedules_common.title, Schedules_common.cycle, Schedules_common.memo, Schedules_date.time, Schedules_date.check, Schedules_date.push).join(Schedules_common).filter(and_(Schedules_date.alarmdate==alarmdate, Schedules_date.user_id==user_id)).all()
+      results = []
+      for el in data:
+        result = {}
+        result['schedules_common_id'] = el.id
+        result['title'] = el.title
+        result['cycle'] = el.cycle
+        result['memo'] = el.memo
+        result['time'] = datetime.time.strftime(el.time, "%H:%M")
+        result['check'] = el.check
+        result['push'] = el.push
+        results.append(result)
 
-        print(data)
-        results = []
-        for el in data:
-          result = {}
-          result['schedules_common_id'] = el.id
-          result['title'] = el.title
-          result['cycle'] = el.cycle
-          result['memo'] = el.memo
-          result['time'] = datetime.time.strftime(el.time, "%H:%M")
-          result['check'] = el.check
-          result['push'] = el.push
-          results.append(result)
-
-        results = sorting_time(results)
-        response_object = {
-          'status': 'OK',
-          'message': 'Successfully Get Alarms List on Clicked date for main page and calendar page.',
-          'results': results
-        }
-        return response_object, 200
-    except Exception as e:
-      db.session.rollback()
-      raise
-      print(e)
-      response_object = {
-        'status': 'fail',
-        'message': 'Provide a valid auth token.',
-        }
-      return response_object, 401
-    finally:
-      db.session.close()
+      return sorting_time(results)
   except Exception as e:
     response_object = {
-      'status': 'Internal Server Error',
-      'message': 'Some Internal Server Error occurred.',
-    }
-    return response_object, 500
+      'status': 'fail',
+      'message': 'Provide a valid auth token.',
+      }
+    return response_object, 401
 
 
 def get_today_checked(data): 
   """ Get today checked API for calendar"""
   try: 
-    start_day = datetime.datetime.strptime(data['start_day'], '%Y-%m-%d')
-    end_day = datetime.datetime.strptime(data['end_day'], '%Y-%m-%d')
-    try: 
-      token = request.headers.get('Authorization')
-
-      decoded_token = jwt.decode(token, jwt_key, jwt_alg)
-      user_id = decoded_token['id']
-
-      if decoded_token:
-        print('get today checked')
-        topic_fields = {
-          'check': fields.Boolean(required=True),
-        }
-        data = [marshal(topic, topic_fields) for topic in Schedules_date.query
-                                                                        .filter(and_(Schedules_date.alarmdate.between(start_day, end_day), Schedules_date.user_id==user_id))
-                                                                        .all()]
-                                                                        
-        print(data)
-        response_object = { 
-          'status': 'OK', 
-          'message': 'Successfully get today checked.',
-          'results': data
-        }
-        return response_object, 200
-    except Exception as e:
-      db.session.rollback()
-      raise
-      response_object = {
-        'status': 'fail',
-        'message': 'Provide a valid auth token.',
+    start_day = datetime.datetime.strptime(data['startDay'], '%Y-%m-%d')
+    end_day = datetime.datetime.strptime(data['endDay'], '%Y-%m-%d')
+    token = request.headers.get('Authorization')
+    decoded_token = jwt.decode(token, jwt_key, jwt_alg)
+    user_id = decoded_token['id']
+    if user_id:
+      topic_fields = {
+        'check': fields.Boolean(required=True),
       }
-      return response_object, 401
-    finally:
-      db.session.close()
+      data = [marshal(topic, topic_fields) for topic in Schedules_date.query
+                                                                      .filter(and_(Schedules_date.alarmdate.between(start_day, end_day), Schedules_date.user_id==user_id))
+                                                                      .all()]
+                                                                      
+      return data
   except Exception as e:
     response_object = {
-      'status': 'Internal Server Error',
-      'message': 'Some Internal Server Error occurred.',
+      'status': 'fail',
+      'message': 'Provide a valid auth token.',
     }
-    return response_object, 500
+    return response_object, 401
 
 
 def patch_check(data):

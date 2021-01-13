@@ -38,7 +38,7 @@ class Check(Resource):
     """Get Today Alarm API"""
     try:
       req = request.args.to_dict()
-      result = {'todayCheck' : get_today_checked(req) , 'todayAlarm' : get_alarms_list(req)}
+      result = {'today_check' : get_today_checked(req) , 'today_alarm' : get_alarms_list(req)}
       print(result)
       response_object = { 
           'status': 'OK', 

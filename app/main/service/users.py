@@ -3,10 +3,10 @@ from flask import request, jsonify, redirect
 from flask_restx import Resource, fields, marshal
 import json ,io, jwt, os
 from sqlalchemy.sql import text
-from sqlalchemy import and_ 
+from sqlalchemy import and_ , create_engine
 from app.main import db
 from app.main.model.users import Users
-from ..config import jwt_key, jwt_alg, MAIL_SENDER, MAIL_SENDER_PASSWORD
+from ..config import jwt_key, jwt_alg, MAIL_SENDER, MAIL_SENDER_PASSWORD, DevelopmentConfig #배포때는 ProductionConfig
 from string import punctuation, ascii_letters, digits
 import random
 from flask_mail import Message, Mail
@@ -484,13 +484,17 @@ def edit_user_info(data):
 def get_first_loading():
   """Check Server is Ready"""
   try:
-    user_info = Users.query.all()
+    engine = create_engine(DevelopmentConfig.SQLALCHEMY_DATABASE_URI)#배포때는 ProductionConfig
+    conn = engine.connect()
     response_object = {
       'status': 'OK',
       'message': 'Server is Successfully Ready.',
     }
     return response_object, 200
   except Exception as e:
+    print(e)
+    db.session.rollback()
+    raise
     response_object = {
       'status': 'Internal Server Error',
       'message': 'Some Internal Server Error occurred.',

@@ -17,6 +17,7 @@ import os
 import sys
 import io
 import jwt
+import json
 
 from ..config import jwt_key, jwt_alg
 from ..util.dto import MedicineDto
@@ -26,16 +27,16 @@ from cnn.class_list import get_class_list
 interpreter = None
 
 #Load TFLite model and allocate tensors.
-def load_model():
-  global interpreter
-  currdir = os.getcwd()
-  print("currdir: ", currdir)
-  modeldir = os.path.join(currdir+"/cnn/model/medisharp_tflite_model.tflite")
-  interpreter = tf.lite.Interpreter(model_path=modeldir)
+# def load_model():
+#   global interpreter
+#   currdir = os.getcwd()
+#   print("currdir: ", currdir)
+#   modeldir = os.path.join(currdir+"/cnn/model/medisharp_tflite_model.tflite")
+#   interpreter = tf.lite.Interpreter(model_path=modeldir)
 
-print(("* Loading Keras model and Flask starting server..."
-		"please wait until server has fully started"))
-load_model()
+# print(("* Loading Keras model and Flask starting server..."
+# 		"please wait until server has fully started"))
+# load_model()
 
 api = MedicineDto.api
 # _medicines = MedicineDto.medicines
@@ -73,24 +74,29 @@ class PredictMedicineName(Resource):
               }
             return response_object, 400
           elif file and file.filename:
-            interpreter.allocate_tensors()
-            #Get input and output tensors.
-            input_details = interpreter.get_input_details()
-            output_details = interpreter.get_output_details()
             #Ready for the Data
             image = flask.request.files["image"].read()
             image = Image.open(io.BytesIO(image))
             image = prepare_image(image, target=(224, 224))
             #input
-            interpreter.set_tensor(input_details[0]['index'], image)
-            interpreter.invoke()
+            input_data_json = json.dumps({
+              "signature_name": "serving_default",
+              "instances": image.tolist()
+            })
+            #tf serving URL
+            print("LET'S TFSERVING!!!!")
+            SERVER_URL = 'http://medisharp-tf.herokuapp.com/v1/models/model:predict'
             #output
-            output_data = interpreter.get_tensor(output_details[0]['index'])
+            response = requests.post(SERVER_URL, data=input_data_json)
+            response.raise_for_status() #에러 발생시 예외 발생시킴
+            response = response.json() #응답은 "predictions" 키 하나를 가진 딕셔너리로, 이 키에 해당하는 값은 예측의 리스트
             
+            output_data = response["predictions"]
             pred_class = np.argmax(output_data, axis=-1)
+
             prediction_result = class_list[int(pred_class)]
             print("prediction: ", class_list[int(pred_class)])
-            
+
             response_object = {
               'status': 'OK',
               'message': 'Successfully predict image class.',
